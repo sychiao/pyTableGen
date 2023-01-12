@@ -15,16 +15,20 @@ link_directories(${LLVM_LIBRARY_DIR})
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
+set (CMAKE_CXX_STANDARD 14)
 
 set(LLVM_LINK_COMPONENTS TableGen Support)
 
-pybind11_add_module(foo 
-    SHARED foo.cpp)
+pybind11_add_module(tablegen 
+    SHARED
+    main_module.cpp
+    lib/Record.cpp
+)
 
-target_include_directories(foo PUBLIC
+target_include_directories(tablegen PUBLIC
     build/src/llvm/llvm/lib/TableGen
 )
 
 llvm_map_components_to_libnames(
     llvm_libs ${LLVM_LINK_COMPONENTS})
-target_link_libraries(foo PRIVATE ${llvm_libs})
+target_link_libraries(tablegen PRIVATE ${llvm_libs})

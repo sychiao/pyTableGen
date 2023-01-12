@@ -1,4 +1,5 @@
-#include<pybind11/pybind11.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl_bind.h>
 
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
@@ -35,21 +36,22 @@ RecordKeeper* ParseTableGen(std::string InputFileName) {
     return records;
 }
 
+PYBIND11_MAKE_OPAQUE(std::vector<std::string>);
 
-PYBIND11_MODULE(foo, m) {
+void init_RecordKeeper(py::module &);
+void init_Record(py::module &);
+
+void init_Type(py::module& m) {
+    py::bind_vector<std::vector<std::string>>(m, "StringVector");
+    py::implicitly_convertible<py::iterable, std::vector<std::string>>();
+}
+
+PYBIND11_MODULE(tablegen, m) {
     m.doc() = "pybind11 example plugin";
     m.def("add", &add, "A function which adds two numbers");
-
-    py::class_<Record>(m, "Record")
-      .def("getName", [](Record &Self) {return Self.getName().str();});
-
-    py::class_<llvm::RecordKeeper>(m, "RecordKeeper")
-      .def(py::init<>())
-      .def("getClass", [](llvm::RecordKeeper &Self, std::string clsname) {
-            return Self.getClass(clsname);
-        },
-        py::return_value_policy::reference
-    );
+    init_Type(m);
+    init_Record(m);
+    init_RecordKeeper(m);
 
     m.def("ParseTableGen", &ParseTableGen);
 }
