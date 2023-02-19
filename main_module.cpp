@@ -2,7 +2,7 @@
 #include <pybind11/stl_bind.h>
 
 #include "TGParser.h"
-#include "BindInit.h"
+#include "BindImpl.h"
 
 using namespace llvm;
 
@@ -28,10 +28,10 @@ RecordKeeper* ParseTableGen(std::string InputFileName) {
 PYBIND11_MODULE(tablegen, m) {
     m.doc() = "pybind11 example plugin";
 
-    init_Type(m);
-    init_Record(m);
-    init_RecordKeeper(m);
-    init_RecordVal(m);
+    def_Type(m);
+    def_Record(m);
+    def_RecordKeeper(m);
+    def_RecordVal(m);
 
     m.def("ParseTableGen", &ParseTableGen);
 }

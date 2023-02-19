@@ -30,7 +30,7 @@ struct RecordKeeper_Impl {
   }
 };
 
-void init_RecordKeeper(py::module &m) {
+void def_RecordKeeper(py::module &m) {
     //py::bind_map<std::map<std::string, Record*>>(m, "RecordMap");
 
     py::class_<llvm::RecordKeeper>(m, "RecordKeeper")
@@ -60,7 +60,7 @@ struct BindRecordImpl {
 };
 
 
-void init_Record(py::module &m) {
+void def_Record(py::module &m) {
     py::class_<llvm::Record>(m, "Record")
       .def("getName", [](Record &Self) {return Self.getName().str();})
       .def("getValues", &BindRecordImpl::getValues)
@@ -70,7 +70,7 @@ void init_Record(py::module &m) {
     
 }
 
-void init_RecordVal(py::module &m) {
+void def_RecordVal(py::module &m) {
   py::class_<RecordVal>(m, "RecordVal")
       .def("getName", [](RecordVal &Self) {return Self.getName().str();})
       .def("getTypeName", [](RecordVal &Self){return Self.getType()->getAsString(); })

@@ -15,7 +15,7 @@ PYBIND11_MAKE_OPAQUE(std::vector<Record*>);
 PYBIND11_MAKE_OPAQUE(std::vector<RecordVal>);
 PYBIND11_MAKE_OPAQUE(std::vector<std::string>);
 
-void init_Type(py::module& m) {
+void def_Type(py::module& m) {
     py::bind_vector<std::vector<std::string>>(m, "StringVector");
     py::implicitly_convertible<py::iterable, std::vector<std::string>>();
 
