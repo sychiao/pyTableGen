@@ -6,6 +6,9 @@ def test_1():
     ret = tablegen.ParseTableGen(f"{root}/A.td")
     assert(ret.getClass("myRecord").getName() == "myRecord")
 
+    for k, v in ret.getClasses().items():
+        assert(k == v.getName())
+
     lst = ret.getAllDerivedDefinitions("myRecord")
     assert(tuple(rec.getName() for rec in lst) == ("rec1", "rec2"))
 

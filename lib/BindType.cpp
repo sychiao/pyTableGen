@@ -11,14 +11,21 @@
 namespace py = pybind11;
 using namespace llvm;
 
-PYBIND11_MAKE_OPAQUE(std::vector<Record*>);
-PYBIND11_MAKE_OPAQUE(std::vector<RecordVal>);
-PYBIND11_MAKE_OPAQUE(std::vector<std::string>);
+using StringVector = std::vector<std::string>;
+using RecordVector = std::vector<Record*>;
+using RecordValVector = std::vector<RecordVal>;
+using RecordMap = std::map<std::string, Record*, std::less<>>;
+
+PYBIND11_MAKE_OPAQUE(RecordVector);
+PYBIND11_MAKE_OPAQUE(RecordValVector);
+PYBIND11_MAKE_OPAQUE(StringVector);
+PYBIND11_MAKE_OPAQUE(RecordMap);
 
 void def_Type(py::module& m) {
     py::bind_vector<std::vector<std::string>>(m, "StringVector");
     py::implicitly_convertible<py::iterable, std::vector<std::string>>();
 
-    py::bind_vector<std::vector<Record*>>(m, "RecordVector");
-    py::bind_vector<std::vector<RecordVal>>(m, "RecordValVector");
+    py::bind_vector<RecordVector>(m, "RecordVector");
+    py::bind_vector<RecordValVector>(m, "RecordValVector");
+    py::bind_map<RecordMap>(m, "RecordMap");
 }

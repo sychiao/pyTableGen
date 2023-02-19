@@ -23,6 +23,8 @@ include(AddLLVM)
 set (CMAKE_CXX_STANDARD 14)
 
 set(LLVM_LINK_COMPONENTS TableGen Support)
+# set(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+# set(CMAKE_C_FLAGS   "-g -O0 -fprofile-arcs -ftest-coverage")
 
 pybind11_add_module(tablegen 
     SHARED

@@ -15,6 +15,14 @@ namespace py = pybind11;
 using namespace llvm;
 
 struct RecordKeeper_Impl {
+  static std::map<std::string, Record*, std::less<>> getClasses(llvm::RecordKeeper &Self) {
+    std::map<std::string, Record*, std::less<>> ret;     
+    for (const auto& kv : Self.getClasses()) {
+          ret[kv.first] = kv.second.get();
+    }
+    return ret;
+  }
+
   static std::vector<Record*> getAllDerivedDefinitions(RecordKeeper &Self, py::args args) {
         auto clsnames = args.cast<std::vector<std::string>>();
         return RecordKeeper_Impl::getAllDerivedDefinitions(Self, clsnames);
@@ -35,11 +43,12 @@ void def_RecordKeeper(py::module &m) {
 
     py::class_<llvm::RecordKeeper>(m, "RecordKeeper")
       .def(py::init<>())
+      .def("getClasses", &RecordKeeper_Impl::getClasses, py::return_value_policy::reference)
       .def("getClass", [](llvm::RecordKeeper &Self, std::string clsname) {
             return Self.getClass(clsname);
         }, py::return_value_policy::reference)
       .def("getDef", [](llvm::RecordKeeper &Self, std::string clsname){
-            return Self.getDef(clsname);
+            return (clsname);
         }, py::return_value_policy::reference)
       .def("getAllDerivedDefinitions",
         py::overload_cast<llvm::RecordKeeper&, std::string> (&RecordKeeper_Impl::getAllDerivedDefinitions),
