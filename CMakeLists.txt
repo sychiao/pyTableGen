@@ -1,10 +1,15 @@
-project(tablegen-py)
 
 cmake_minimum_required(VERSION 3.22)
-include(cmake/pybind11.cmake)
-# include(cmake/llvm.cmake)
+project(tablegen-py)
 
-set(LLVM_DIR build/llvm/lib/cmake/llvm)
+if(NOT DEFINED pybind11_SOURCE_DIR)
+  message(STATUS "Not find pybind11 try to download one")
+  include(cmake/pybind11.cmake)
+endif()
+add_subdirectory(${pybind11_SOURCE_DIR})
+
+set(LLVM_PREFIX /home/ycsu/Develop/TableGen.py-dev/llvm-project/install)
+set(LLVM_DIR ${LLVM_PREFIX}/lib/cmake/llvm)
 find_package(LLVM REQUIRED CONFIG)
 
 message(STATUS "Using LLVM ${LLVM_PACKAGE_VERSION}")
@@ -27,7 +32,7 @@ pybind11_add_module(tablegen
 )
 
 target_include_directories(tablegen PUBLIC
-    build/src/llvm/llvm/lib/TableGen
+    /home/ycsu/Develop/TableGen.py-dev/llvm-project/llvm/lib/TableGen
     include/
 )
 

@@ -19,27 +19,12 @@ class CMakeExtension(Extension):
 class CMakeBuild(build_ext):
     def build_extension(self, ext: CMakeExtension) -> None:
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)  # type: ignore[no-untyped-call]
-        extdir = ext_fullpath.parent.resolve()
+        ext_module_dir = ext_fullpath.parent.resolve()
 
-        print(">>>", extdir)
-
-        cmake_args = [
-            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
-            f"-DPYTHON_EXECUTABLE={sys.executable}",
-        ]
-
-        build_temp = Path(self.build_temp)
-        if not build_temp.exists():
-            build_temp.mkdir(parents=True)
-        
-        print("build_temp:", build_temp)
-
-        subprocess.run(
-            ["cmake", "../.."] + cmake_args, cwd=build_temp, check=True
-        )
-        subprocess.run(
-            ["cmake", "--build", "."], cwd=build_temp, check=True
-        )
+        subprocess.run(["cmake", "--preset=default"
+                               , f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={ext_module_dir}{os.sep}"
+                               , f"-DPYTHON_EXECUTABLE={sys.executable}"], check=True)
+        subprocess.run(["cmake", "--build", "--preset=default"], check=True)
 
 
 # The information here can also be placed in setup.cfg - better separation of
@@ -47,9 +32,8 @@ class CMakeBuild(build_ext):
 setup(
     name="tablegen",
     version="0.0.1",
-    author="Dean Moldovan",
-    author_email="dean0x7d@gmail.com",
-    description="A test project using pybind11 and CMake",
+    author="Su, Yi-Chiao",
+    description="A project using pybind11 and CMake",
     long_description="",
     ext_modules=[CMakeExtension("tablegen")],
     cmdclass={"build_ext": CMakeBuild},
