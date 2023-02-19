@@ -23,10 +23,12 @@ pybind11_add_module(tablegen
     SHARED
     main_module.cpp
     lib/Record.cpp
+    lib/BindType.cpp
 )
 
 target_include_directories(tablegen PUBLIC
     build/src/llvm/llvm/lib/TableGen
+    include/
 )
 
 llvm_map_components_to_libnames(
