@@ -1,12 +1,22 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-    "ninja",
-    "cmake>=3.12",
-]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel"]
 
+[project]
+name = "mypackage"
+description = "My package description"
+readme = "README.rst"
+requires-python = ">=3.7"
+keywords = ["one", "two"]
+license = {text = "BSD 3-Clause License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "requests",
+    'importlib-metadata; python_version<"3.8"',
+]
+dynamic = ["version"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
