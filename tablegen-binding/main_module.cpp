@@ -46,6 +46,7 @@ PYBIND11_MODULE(binding, m) {
     def_Record(m);
     def_RecordKeeper(m);
     def_RecordVal(m);
+    def_RecTy(m);
     def_Init(m);
 
     m.def("ParseTableGen",

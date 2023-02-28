@@ -1,0 +1,116 @@
+- Record/RecordKeeper/RecTy
+    - Record
+        - [x] unsigned 	getID () const
+        - [x] StringRef 	getName () const
+        - [x] Init * 	getNameInit () const
+        - [x] std::string 	getNameInitAsString () const
+        - [ ] void 	setName (Init *Name)
+        - [ ] ArrayRef< SMLoc > 	getLoc () const
+        - [ ] void 	appendLoc (SMLoc Loc)
+        - [ ] ArrayRef< SMLoc > 	getForwardDeclarationLocs () const
+        - [ ] void 	appendReferenceLoc (SMRange Loc)
+        - [ ] ArrayRef< SMRange > 	getReferenceLocs () const
+        - [ ] void 	updateClassLoc (SMLoc Loc)
+        - [x] RecordRecTy * 	getType ()
+        - [x] DefInit * 	getDefInit ()
+        - [x] `readonly_property` bool 	isClass () const 
+        - [ ] ArrayRef< Init * > 	getTemplateArgs () const
+        - [ ] ArrayRef< RecordVal > 	getValues () const
+        - [ ] ArrayRef< AssertionInfo > 	getAssertions () const
+        - [ ] ArrayRef< std::pair< Record *, SMRange > > 	getSuperClasses () const
+        - [ ] bool 	hasDirectSuperClass (const Record *SuperClass) const
+        - [ ] void 	getDirectSuperClasses (SmallVectorImpl< Record * > &Classes) const
+        - [ ] bool 	isTemplateArg (Init *Name) const
+        - [ ] const RecordVal * 	getValue (const Init *Name) const
+        - [ ] const RecordVal * 	getValue (StringRef Name) const
+        - [ ] RecordVal * 	getValue (const Init *Name)
+        - [ ] RecordVal * 	getValue (StringRef Name)
+        - [ ] void 	addTemplateArg (Init *Name)
+        - [ ] void 	addValue (const RecordVal &RV)
+        - [ ] void 	removeValue (Init *Name)
+        - [ ] void 	removeValue (StringRef Name)
+        - [ ] void 	addAssertion (SMLoc Loc, Init *Condition, Init *Message)
+        - [ ] void 	appendAssertions (const Record *Rec)
+        - [ ] void 	checkRecordAssertions ()
+        - [ ] void 	checkUnusedTemplateArgs ()
+        - [ ] bool 	isSubClassOf (const Record *R) const
+        - [ ] bool 	isSubClassOf (StringRef Name) const
+        - [ ] void 	addSuperClass (Record *R, SMRange Range)
+        - [ ] void 	resolveReferences (Init *NewName=nullptr)
+        - [ ] void 	resolveReferences (Resolver &R, const RecordVal *SkipVal=nullptr)
+        - [ ] RecordKeeper & 	getRecords () const
+        - [ ] bool 	isAnonymous () const
+        - [ ] void 	dump () const
+        - [ ] SMLoc 	getFieldLoc (StringRef FieldName) const
+        - [ ] Init * 	getValueInit (StringRef FieldName) const
+        - [ ] bool 	isValueUnset (StringRef FieldName) const
+        - [ ] StringRef 	getValueAsString (StringRef FieldName) const
+        - [ ] std::optional< StringRef > 	getValueAsOptionalString (StringRef FieldName) const
+        - [ ] BitsInit * 	getValueAsBitsInit (StringRef FieldName) const
+        - [ ] ListInit * 	getValueAsListInit (StringRef FieldName) const
+        - [ ] std::vector< Record * > 	getValueAsListOfDefs (StringRef FieldName) const
+        - [ ] std::vector< int64_t > 	getValueAsListOfInts (StringRef FieldName) const
+        - [ ] std::vector< StringRef > 	getValueAsListOfStrings (StringRef FieldName) const
+        - [ ] Record * 	getValueAsDef (StringRef FieldName) const
+        - [ ] Record * 	getValueAsOptionalDef (StringRef FieldName) const
+        - [ ] bool 	getValueAsBit (StringRef FieldName) const
+        - [ ] bool 	getValueAsBitOrUnset (StringRef FieldName, bool &Unset) const
+        - [ ] int64_t 	getValueAsInt (StringRef FieldName) const
+        - [ ] DagInit * 	getValueAsDag (StringRef FieldName) const
+    - RecordRecTy
+        - [ ] void 	Profile (FoldingSetNodeID &ID) const
+        - [ ] ArrayRef< Record * > 	getClasses () const
+        - [ ] const_record_iterator 	classes_begin () const
+        - [ ] const_record_iterator 	classes_end () const
+        - [ ] std::string 	getAsString () const override
+        - [ ] bool 	isSubClassOf (Record *Class) const
+        - [ ] bool 	typeIsConvertibleTo (const RecTy *RHS) const override 
+        - [ ] bool 	typeIsA (const RecTy *RHS) const override
+- binding API List:
+    - BitInit
+        - [x] bool 	getValue () const
+        - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override 
+        - [x] Init * 	getBit (unsigned Bit) const override
+        - [x] bool 	isConcrete () const override
+        - [x] std::string 	getAsString () const override
+    - BitsInit
+        - [ ] void 	Profile (FoldingSetNodeID &ID) const 
+        - [ ] unsigned 	getNumBits () const
+        - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override 
+        - [ ] Init * 	convertInitializerBitRange (ArrayRef< unsigned > Bits) const override 
+        - [ ] bool 	isComplete () const override 
+        - [ ] bool 	allInComplete () const
+        - [ ] bool 	isConcrete () const override 
+        - [ ] std::string 	getAsString () const override 
+        - [ ] Init * 	resolveReferences (Resolver &R) const override 
+        - [ ] Init * 	getBit (unsigned Bit) const override
+    - DefInit
+        - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override 
+        - [ ] Record * 	getDef () const
+        - [ ] RecTy * 	getFieldType (StringInit *FieldName) const override 
+        - [ ] bool 	isConcrete () const override 
+        - [ ] std::string 	getAsString () const override
+    - ListInit 
+        - [ ] void 	Profile (FoldingSetNodeID &ID) const
+        - [ ] Init * 	getElement (unsigned i) const
+        - [ ] RecTy * 	getElementType () const
+        - [ ] Record * 	getElementAsRecord (unsigned i) const
+        - [ ] Init * 	convertInitListSlice (ArrayRef< unsigned > Elements) const override
+        - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override
+        - [ ] Init * 	resolveReferences (Resolver &R) const override
+        - [ ] bool 	isComplete () const override
+        - [ ] bool 	isConcrete () const override
+        - [ ] std::string 	getAsString () const override
+        - [ ] ArrayRef< Init * > 	getValues () const
+        - [ ] const_iterator 	begin () const
+        - [ ] const_iterator 	end () const
+        - [ ] size_t 	size () const
+        - [ ] bool 	empty () const
+        - [ ] Init * 	getBit (unsigned Bit) const override
+    - VarInit
+        - [x] StringRef 	getName () const
+        - [x] Init * 	getNameInit () const
+        - [x] std::string 	getNameInitAsString () const
+        - [ ] Init * 	resolveReferences (Resolver &R) const override 
+        - [ ] Init * 	getBit (unsigned Bit) const override
+        - [x] std::string 	getAsString () const override

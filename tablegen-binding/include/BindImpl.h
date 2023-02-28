@@ -4,5 +4,6 @@ namespace py = pybind11;
 void def_RecordKeeper(py::module &);
 void def_Record(py::module &);
 void def_RecordVal(py::module &);
+void def_RecTy(py::module& m);
 void def_Type(py::module& m);
 void def_Init(py::module& m);

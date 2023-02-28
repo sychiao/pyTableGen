@@ -30,6 +30,7 @@ pybind11_add_module(tablegen
     lib/Init.cpp
     lib/Record.cpp
     lib/BindType.cpp
+    lib/RecTy.cpp
 )
 
 message(STATUS "install tablegen binding to ${CMAKE_CURRENT_SOURCE_DIR}/../src/tablegen")

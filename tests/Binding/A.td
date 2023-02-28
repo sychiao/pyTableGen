@@ -2,8 +2,13 @@ class myRecord {
   int x = 123;
 }
 
-class Inst {
+class Base {
+  string _name = "empty";
+}
+
+class Inst : Base {
   int Z = 123;
+  list<int> lst = [1, 2, 3];
 }
 
 def rec1 : myRecord {

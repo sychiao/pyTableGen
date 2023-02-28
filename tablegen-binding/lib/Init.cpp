@@ -44,6 +44,42 @@ void def_Init(py::module &m) {
       .def_static("classof", &llvm::TypedInit::classof)
     ;
 
+    // BitInit
+    py::class_<BitInit, TypedInit>(m, "BitInit")
+      .def("getValue",    &llvm::BitInit::getValue)
+      .def("getBit",      &llvm::BitInit::getBit)
+      .def("isConcrete",  &llvm::BitInit::isConcrete)
+      .def("getAsString", &llvm::BitInit::getAsString)
+    ;
+
+    // BitsInit
+    py::class_<BitsInit, TypedInit>(m, "BitsInit")
+      .def("getBit",        &llvm::BitsInit::getBit)
+      .def("isConcrete",    &llvm::BitsInit::isConcrete)
+      .def("getAsString",   &llvm::BitsInit::getAsString)
+      .def("getNumBits",    &llvm::BitsInit::getNumBits)
+      .def("isComplete",    &llvm::BitsInit::isComplete)
+      .def("allInComplete", &llvm::BitsInit::allInComplete)
+    ;
+
+    // DefInit
+    py::class_<DefInit, TypedInit>(m, "DefInit")
+      .def("isConcrete",    &llvm::DefInit::isConcrete)
+      .def("getAsString",   &llvm::DefInit::getAsString)
+      .def("getDef",        &llvm::DefInit::getDef)
+    ;
+
+    // ListInit 
+    py::class_<ListInit, TypedInit>(m, "ListInit")
+      .def("getElement",    &llvm::ListInit::getElement)
+      .def("isConcrete",    &llvm::ListInit::isConcrete)
+      .def("getAsString",   &llvm::ListInit::getAsString)
+      .def("isComplete",    &llvm::ListInit::isComplete)
+      .def("size",          &llvm::ListInit::size)
+      .def("empty",         &llvm::ListInit::empty)
+      .def("getBit",        &llvm::ListInit::getBit)
+    ;
+
     // IntInit
     py::class_<IntInit, TypedInit>(m, "IntInit")
       .def("getValue",    &llvm::IntInit::getValue)
@@ -64,4 +100,13 @@ void def_Init(py::module &m) {
       .def("getAsUnquotedString", &BindStringInitImpl::getAsUnquotedString)
       .def("isConcrete", &llvm::StringInit::isConcrete)
     ;
+
+    // VarInit
+    py::class_<VarInit, TypedInit>(m, "VarInit")
+      .def("getName", [](VarInit &Self){return Self.getName().str();})
+      .def("getNameInit", &llvm::VarInit::getNameInit)
+      .def("getNameInitAsString", &llvm::VarInit::getNameInitAsString)
+      .def("getAsString", &llvm::VarInit::getAsString)
+    ;
+
 }

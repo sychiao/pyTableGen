@@ -30,11 +30,13 @@ struct BindRecordImpl {
 void def_Record(py::module &m) {
     py::class_<llvm::Record>(m, "Record")
       .def("getID", [](Record &Self) {return Self.getID();})
-      // Init * 	getNameInit () const
       .def("getNameInit", [](Record &Self) {return Self.getNameInit();}, py::return_value_policy::reference)
+      .def("getDefInit",  [](Record &Self) {return Self.getDefInit();}, py::return_value_policy::reference)
       .def("getName", [](Record &Self) {return Self.getName().str();})
       .def("getValues", &BindRecordImpl::getValues)
+      .def("getType", &llvm::Record::getType, py::return_value_policy::reference)
       .def_property_readonly("isClass", &Record::isClass)
     ;
 }
+
 
