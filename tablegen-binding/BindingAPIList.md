@@ -1,53 +1,53 @@
-- Record/RecordKeeper/RecTy
+- Record/RecordKeeper
     - Record
         - [x] unsigned 	getID () const
         - [x] StringRef 	getName () const
         - [x] Init * 	getNameInit () const
         - [x] std::string 	getNameInitAsString () const
-        - [ ] void 	setName (Init *Name)
-        - [ ] ArrayRef< SMLoc > 	getLoc () const
-        - [ ] void 	appendLoc (SMLoc Loc)
-        - [ ] ArrayRef< SMLoc > 	getForwardDeclarationLocs () const
-        - [ ] void 	appendReferenceLoc (SMRange Loc)
-        - [ ] ArrayRef< SMRange > 	getReferenceLocs () const
-        - [ ] void 	updateClassLoc (SMLoc Loc)
+        - [x] `Unsupport modify` void 	setName (Init *Name)
+        - [x] ArrayRef< SMLoc > 	getLoc () const
+        - [x] `Unsupport modify` void 	appendLoc (SMLoc Loc)
+        - [x] ArrayRef< SMLoc > 	getForwardDeclarationLocs () const
+        - [x] `Unsupport modify` void 	appendReferenceLoc (SMRange Loc)
+        - [x] `Unsupport modify` ArrayRef< SMRange > 	getReferenceLocs () const
+        - [x] `Unsupport modify` void 	updateClassLoc (SMLoc Loc)
         - [x] RecordRecTy * 	getType ()
         - [x] DefInit * 	getDefInit ()
         - [x] `readonly_property` bool 	isClass () const 
-        - [ ] ArrayRef< Init * > 	getTemplateArgs () const
-        - [ ] ArrayRef< RecordVal > 	getValues () const
-        - [ ] ArrayRef< AssertionInfo > 	getAssertions () const
+        - [x] ArrayRef< Init * > 	getTemplateArgs () const
+        - [x] ArrayRef< RecordVal > 	getValues () const
+        - [O] `Pending`ArrayRef< AssertionInfo > 	getAssertions () const
         - [ ] ArrayRef< std::pair< Record *, SMRange > > 	getSuperClasses () const
         - [ ] bool 	hasDirectSuperClass (const Record *SuperClass) const
         - [ ] void 	getDirectSuperClasses (SmallVectorImpl< Record * > &Classes) const
-        - [ ] bool 	isTemplateArg (Init *Name) const
-        - [ ] const RecordVal * 	getValue (const Init *Name) const
-        - [ ] const RecordVal * 	getValue (StringRef Name) const
-        - [ ] RecordVal * 	getValue (const Init *Name)
-        - [ ] RecordVal * 	getValue (StringRef Name)
-        - [ ] void 	addTemplateArg (Init *Name)
-        - [ ] void 	addValue (const RecordVal &RV)
-        - [ ] void 	removeValue (Init *Name)
-        - [ ] void 	removeValue (StringRef Name)
-        - [ ] void 	addAssertion (SMLoc Loc, Init *Condition, Init *Message)
-        - [ ] void 	appendAssertions (const Record *Rec)
-        - [ ] void 	checkRecordAssertions ()
-        - [ ] void 	checkUnusedTemplateArgs ()
-        - [ ] bool 	isSubClassOf (const Record *R) const
-        - [ ] bool 	isSubClassOf (StringRef Name) const
-        - [ ] void 	addSuperClass (Record *R, SMRange Range)
+        - [x] bool 	isTemplateArg (Init *Name) const
+        - [O] `Pending` const RecordVal * 	getValue (const Init *Name) const
+        - [x] const RecordVal * 	getValue (StringRef Name) const
+        - [x] RecordVal * 	getValue (const Init *Name)
+        - [x] RecordVal * 	getValue (StringRef Name)
+        - [x] `Unsupport modify` void 	addTemplateArg (Init *Name)
+        - [x] `Unsupport modify` void 	addValue (const RecordVal &RV)
+        - [x] `Unsupport modify` void 	removeValue (Init *Name)
+        - [x] `Unsupport modify` void 	removeValue (StringRef Name)
+        - [x] `Unsupport modify` void 	addAssertion (SMLoc Loc, Init *Condition, Init *Message)
+        - [x] `Unsupport modify` void 	appendAssertions (const Record *Rec)
+        - [o] `Pending` void 	checkRecordAssertions ()
+        - [o] `Pending` void 	checkUnusedTemplateArgs ()
+        - [x] bool 	isSubClassOf (const Record *R) const
+        - [x] bool 	isSubClassOf (StringRef Name) const
+        - [x] `Unsupport modify` void 	addSuperClass (Record *R, SMRange Range)
         - [ ] void 	resolveReferences (Init *NewName=nullptr)
         - [ ] void 	resolveReferences (Resolver &R, const RecordVal *SkipVal=nullptr)
-        - [ ] RecordKeeper & 	getRecords () const
-        - [ ] bool 	isAnonymous () const
-        - [ ] void 	dump () const
-        - [ ] SMLoc 	getFieldLoc (StringRef FieldName) const
-        - [ ] Init * 	getValueInit (StringRef FieldName) const
-        - [ ] bool 	isValueUnset (StringRef FieldName) const
-        - [ ] StringRef 	getValueAsString (StringRef FieldName) const
+        - [x] RecordKeeper & 	getRecords () const
+        - [x] bool 	isAnonymous () const
+        - [x] `Unsupport dump` void 	dump () const
+        - [x] SMLoc 	getFieldLoc (StringRef FieldName) const
+        - [x] Init * 	getValueInit (StringRef FieldName) const
+        - [x] bool 	isValueUnset (StringRef FieldName) const
+        - [x] StringRef 	getValueAsString (StringRef FieldName) const
         - [ ] std::optional< StringRef > 	getValueAsOptionalString (StringRef FieldName) const
-        - [ ] BitsInit * 	getValueAsBitsInit (StringRef FieldName) const
-        - [ ] ListInit * 	getValueAsListInit (StringRef FieldName) const
+        - [x] BitsInit * 	getValueAsBitsInit (StringRef FieldName) const
+        - [x] ListInit * 	getValueAsListInit (StringRef FieldName) const
         - [ ] std::vector< Record * > 	getValueAsListOfDefs (StringRef FieldName) const
         - [ ] std::vector< int64_t > 	getValueAsListOfInts (StringRef FieldName) const
         - [ ] std::vector< StringRef > 	getValueAsListOfStrings (StringRef FieldName) const
@@ -57,6 +57,9 @@
         - [ ] bool 	getValueAsBitOrUnset (StringRef FieldName, bool &Unset) const
         - [ ] int64_t 	getValueAsInt (StringRef FieldName) const
         - [ ] DagInit * 	getValueAsDag (StringRef FieldName) const
+- RecTy
+    - RecTy
+        ...
     - RecordRecTy
         - [ ] void 	Profile (FoldingSetNodeID &ID) const
         - [ ] ArrayRef< Record * > 	getClasses () const

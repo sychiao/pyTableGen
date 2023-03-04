@@ -34,8 +34,42 @@ struct BindStringInitImpl {
 
 };
 
+class BindInit : public Init { // helper type for exposing protected functions
+public:
+    using Init::InitKind; // inherited with different access modifier
+};
+
 void def_Init(py::module &m) {
-     py::class_<Init>(m, "Init")
+     // InitKind
+     py::enum_<BindInit::InitKind>(m, "InitKind")
+      .value("IK_First",                BindInit::InitKind::IK_First)
+      .value("IK_FirstTypedInit",       BindInit::InitKind::IK_FirstTypedInit)
+      .value("IK_BitInit",              BindInit::InitKind::IK_BitInit)
+      .value("IK_BitsInit",             BindInit::InitKind::IK_FirstTypedInit)
+      .value("IK_DagInit",              BindInit::InitKind::IK_BitsInit)
+      .value("IK_DefInit",              BindInit::InitKind::IK_DefInit)
+      .value("IK_IntInit",              BindInit::InitKind::IK_IntInit)
+      .value("IK_ListInit",             BindInit::InitKind::IK_ListInit)
+      .value("IK_FirstOpInit",          BindInit::InitKind::IK_FirstOpInit)
+      .value("IK_TernOpInit",           BindInit::InitKind::IK_TernOpInit)
+      .value("IK_UnOpInit",             BindInit::InitKind::IK_UnOpInit)
+      .value("IK_LastOpInit",           BindInit::InitKind::IK_LastOpInit)
+      .value("IK_CondOpInit",           BindInit::InitKind::IK_CondOpInit)
+      .value("IK_FoldOpInit",           BindInit::InitKind::IK_FoldOpInit)
+      .value("IK_IsAOpInit",            BindInit::InitKind::IK_IsAOpInit)
+      .value("IK_ExistsOpInit",         BindInit::InitKind::IK_ExistsOpInit)
+      .value("IK_AnonymousNameInit",    BindInit::InitKind::IK_AnonymousNameInit)
+      .value("IK_StringInit",           BindInit::InitKind::IK_StringInit)
+      .value("IK_VarInit",              BindInit::InitKind::IK_VarInit)
+      .value("IK_VarListElementInit",   BindInit::InitKind::IK_VarListElementInit)
+      .value("IK_VarBitInit",           BindInit::InitKind::IK_VarBitInit)
+      .value("IK_VarDefInit",           BindInit::InitKind::IK_VarDefInit)
+      .value("IK_LastTypedInit",        BindInit::InitKind::IK_LastTypedInit)
+      .value("IK_UnsetInit",            BindInit::InitKind::IK_UnsetInit)
+    ;
+
+    py::class_<Init>(m, "Init")
+      .def("getKind", &llvm::Init::getKind)
       .def("getAsString", &llvm::Init::getAsString);
 
     // TypedInit

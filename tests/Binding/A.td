@@ -1,3 +1,5 @@
+class myRecord;
+
 class myRecord {
   int x = 123;
 }
@@ -6,9 +8,14 @@ class Base {
   string _name = "empty";
 }
 
-class Inst : Base {
-  int Z = 123;
+class Inst<int z> : Base {
+  int Z = z;
   list<int> lst = [1, 2, 3];
+}
+
+class Template<int x> {
+  int xx;
+  int vv = x;
 }
 
 def rec1 : myRecord {
@@ -16,11 +23,11 @@ def rec1 : myRecord {
   int b = 2;
 }
 
-def rec2 : myRecord, Inst {
+def rec2 : myRecord, Inst<123> {
   int a = 2;
   bit b = 0b1;
 }
 
 def XX ;
 
-def YY : Inst;
+def YY : Inst<3>;

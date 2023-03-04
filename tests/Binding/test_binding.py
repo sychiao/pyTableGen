@@ -30,6 +30,10 @@ def test_2():
     root = os.path.dirname(__file__)
     ret = tablegen.binding.ParseTableGen(f"{root}/A.td")
     rec = ret.getClass("myRecord")
+    # for loc in rec.getLoc():
+    #     print(">", loc.getPointer())
+    # for loc in rec.getForwardDeclarationLocs():
+    #     print(">", loc.getPointer())
     NameInit = rec.getNameInit()
     assert(NameInit.getValue() == "myRecord")
     assert(NameInit.getAsString() =='''"myRecord"''')
@@ -37,14 +41,34 @@ def test_2():
     assert(NameInit.getFormat() == tablegen.binding.StringFormat.SF_String)
 
 def test_3():
+    print("Dump log Test_3\n")
     root = os.path.dirname(__file__)
     ret = tablegen.binding.ParseTableGen(f"{root}/A.td")
     rec = ret.getClass("Inst")
+    assert(rec.isClass)
+    print("RecT", rec.getType().getRecTyKind())
     assert(rec.getType().getClasses()[0].getName() == "Base")
     for recT in rec.getType().getClasses():
         print(recT.getName())
 
+
     defInit = rec.getDefInit()
     assert(defInit.getAsString() == "Inst")
     assert(defInit.getDef().getName() == "Inst")
+
+    for value in rec.getValues():
+        print(value.getTypeName(), value.getName(), f"=({value.getValue().getKind()})" , value.getValue().getAsString())
+
+def test_4():
+    print("Dump log Test_4\n")
+    root = os.path.dirname(__file__)
+    ret = tablegen.binding.ParseTableGen(f"{root}/A.td")
+    rec = ret.getClass("Template")
     
+    for targs in rec.getTemplateArgs():
+        print(targs, targs.getAsString(), targs.getKind(), rec.isTemplateArg(targs))
+    print(">")
+    for value in rec.getValues():
+        print(value.getTypeName(), value.getName(), f"=({value.getValue().getKind()})" , value.getValue().getAsString())
+        print(rec.getValue(value.getName()), value)
+    assert(rec.isValueUnset("xx"))

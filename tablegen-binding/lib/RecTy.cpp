@@ -47,7 +47,13 @@ void def_RecTy(py::module &m) {
     .def("getClasses", &BindRecordRecTyImpl::getClasses)
     .def("getAsString", &llvm::RecordRecTy::getAsString)
     .def("isSubClassOf", &llvm::RecordRecTy::isSubClassOf)
+    ;
+
+  py::class_<StringRecTy, RecTy>(m, "StringRecTy")
+    .def("getAsString", &llvm::StringRecTy::getAsString)
+    .def("typeIsConvertibleTo", &llvm::StringRecTy::typeIsConvertibleTo)
     ;  
+
 }
 
 
