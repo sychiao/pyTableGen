@@ -82,7 +82,7 @@ void def_Record(py::module &m) {
       .def("isSubClassOf", py::overload_cast<Record&, Record&>(&BindRecordImpl::isSubClassOf))
       .def("isSubClassOf", py::overload_cast<Record&, std::string>(&BindRecordImpl::isSubClassOf))
       .def("getFieldLoc", [](Record &Self, std::string FieldName){return Self.getFieldLoc(FieldName);})
-      .def("getValueAsString", [](Record &Self, std::string FieldName){return Self.getValueAsString(FieldName).str();})
+      .def("getValueAsString",   [](Record &Self, std::string FieldName){return Self.getValueAsString(FieldName).str();})
       .def("getValueAsBitsInit", [](Record &Self, std::string FieldName){return Self.getValueAsBitsInit(FieldName);})
       .def("getValueAsListInit", [](Record &Self, std::string FieldName){return Self.getValueAsListInit(FieldName);})
       .def_property_readonly("isClass", &Record::isClass)

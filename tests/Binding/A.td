@@ -28,6 +28,8 @@ def rec2 : myRecord, Inst<123> {
   bit b = 0b1;
 }
 
-def XX ;
+def XX {
+  dag x  = (rec2 1, 2, 3);
+}
 
 def YY : Inst<3>;
