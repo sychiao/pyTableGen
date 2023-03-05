@@ -72,3 +72,21 @@ def test_4():
         print(value.getTypeName(), value.getName(), f"=({value.getValue().getKind()})" , value.getValue().getAsString())
         print(rec.getValue(value.getName()), value)
     assert(rec.isValueUnset("xx"))
+
+def test_5():
+    print("Dump log Test_5\n")
+    root = os.path.dirname(__file__)
+    ret = tablegen.binding.ParseTableGen(f"{root}/A.td")
+    rec = ret.getDef("XX")
+    
+    for value in rec.getValues():
+        print(value.getTypeName(), f"Name:{value.getName()}", f"=({value.getValue().getKind()})" , value.getValue().getAsString())
+        print(value.getValue().getOperator().getAsString())
+        for args in value.getValue().getArgs():
+            print(args.getValue())
+
+        print(value.getValue().getNumArgs())
+        print(value.getValue().getArg(0))
+
+        #for i in range(value.getValue().arg_size()):
+        #    print(value.getValue().getArg(i))

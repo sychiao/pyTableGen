@@ -69,7 +69,34 @@
         - [ ] bool 	isSubClassOf (Record *Class) const
         - [ ] bool 	typeIsConvertibleTo (const RecTy *RHS) const override 
         - [ ] bool 	typeIsA (const RecTy *RHS) const override
-- binding API List:
+- Init:
+    - classes
+        - [O] (BitInit)
+        - [ ] (DagInit)
+        - [O] (BitsInit)
+        - [O] (DefInit)
+        - [O] (IntInit)
+        - [O] (ListInit)
+        - [O] (StringInit)
+        - [O] (VarInit)
+        - Op Init
+        - [ ] (First)
+        - [ ] (FirstTypedInit)
+        - [ ] (FirstOpInit)
+        - [ ] (TernOpInit)
+        - [ ] (UnOpInit)
+        - [ ] (LastOpInit)
+        - [ ] (CondOpInit)
+        - [ ] (FoldOpInit)
+        - [ ] (IsAOpInit)
+        - [ ] (ExistsOpInit)
+        - [ ] (AnonymousNameInit)
+        - [ ] (LastTypedInit)
+        - Var Init
+        - [ ] (VarListElementInit)
+        - [ ] (VarBitInit)
+        - [ ] (VarDefInit)
+        - [ ] (UnsetInit)
     - BitInit
         - [x] bool 	getValue () const
         - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override 
@@ -78,38 +105,36 @@
         - [x] std::string 	getAsString () const override
     - BitsInit
         - [ ] void 	Profile (FoldingSetNodeID &ID) const 
-        - [ ] unsigned 	getNumBits () const
+        - [x] unsigned 	getNumBits () const
         - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override 
         - [ ] Init * 	convertInitializerBitRange (ArrayRef< unsigned > Bits) const override 
-        - [ ] bool 	isComplete () const override 
-        - [ ] bool 	allInComplete () const
-        - [ ] bool 	isConcrete () const override 
-        - [ ] std::string 	getAsString () const override 
+        - [x] bool 	isComplete () const override 
+        - [x] bool 	allInComplete () const
+        - [x] bool 	isConcrete () const override 
+        - [x] std::string 	getAsString () const override 
         - [ ] Init * 	resolveReferences (Resolver &R) const override 
-        - [ ] Init * 	getBit (unsigned Bit) const override
+        - [x] Init * 	getBit (unsigned Bit) const override
     - DefInit
         - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override 
-        - [ ] Record * 	getDef () const
+        - [x] Record * 	getDef () const
         - [ ] RecTy * 	getFieldType (StringInit *FieldName) const override 
-        - [ ] bool 	isConcrete () const override 
-        - [ ] std::string 	getAsString () const override
+        - [x] bool 	isConcrete () const override 
+        - [x] std::string 	getAsString () const override
     - ListInit 
         - [ ] void 	Profile (FoldingSetNodeID &ID) const
-        - [ ] Init * 	getElement (unsigned i) const
-        - [ ] RecTy * 	getElementType () const
-        - [ ] Record * 	getElementAsRecord (unsigned i) const
+        - [x] Init * 	getElement (unsigned i) const
+        - [x] RecTy * 	getElementType () const
+        - [x] Record * 	getElementAsRecord (unsigned i) const
         - [ ] Init * 	convertInitListSlice (ArrayRef< unsigned > Elements) const override
         - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override
         - [ ] Init * 	resolveReferences (Resolver &R) const override
-        - [ ] bool 	isComplete () const override
-        - [ ] bool 	isConcrete () const override
-        - [ ] std::string 	getAsString () const override
+        - [x] bool 	isComplete () const override
+        - [x] bool 	isConcrete () const override
+        - [x] std::string 	getAsString () const override
         - [ ] ArrayRef< Init * > 	getValues () const
-        - [ ] const_iterator 	begin () const
-        - [ ] const_iterator 	end () const
-        - [ ] size_t 	size () const
-        - [ ] bool 	empty () const
-        - [ ] Init * 	getBit (unsigned Bit) const override
+        - [x] size_t 	size () const
+        - [x] bool 	empty () const
+        - [x] Init * 	getBit (unsigned Bit) const override
     - VarInit
         - [x] StringRef 	getName () const
         - [x] Init * 	getNameInit () const
@@ -117,3 +142,42 @@
         - [ ] Init * 	resolveReferences (Resolver &R) const override 
         - [ ] Init * 	getBit (unsigned Bit) const override
         - [x] std::string 	getAsString () const override
+    - StringInit
+        - [x] StringRef 	getValue () const
+        - [x] StringFormat 	getFormat () const
+        - [ ] bool 	hasCodeFormat () const
+        - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override
+        - [x] bool 	isConcrete () const override
+        - [ ] std::string 	getAsString () const override
+        - [x] std::string 	getAsUnquotedString () const override
+    - IntInit
+        - [x] int64_t 	getValue () const
+        - [ ] Init * 	convertInitializerTo (RecTy *Ty) const override
+        - [ ] Init * 	convertInitializerBitRange (ArrayRef< unsigned > Bits) const override
+        - [x] bool 	isConcrete () const override
+        - [x] std::string 	getAsString () const override
+        - [ ] Init * 	getBit (unsigned Bit) const override
+    - DagInit
+        - [ ] void 	Profile (FoldingSetNodeID &ID) const
+        - [x] Init * 	getOperator () const
+        - [ ] Record * 	getOperatorAsDef (ArrayRef< SMLoc > Loc) const
+        - [x] StringInit * 	getName () const
+        - [x] StringRef 	getNameStr () const
+        - [x] unsigned 	getNumArgs () const
+        - [x] Init * 	getArg (unsigned Num) const
+        - [x] StringInit * 	getArgName (unsigned Num) const
+        - [ ] StringRef 	getArgNameStr (unsigned Num) const
+        - [x] ArrayRef< Init * > 	getArgs () const
+        - [x] ArrayRef< StringInit * > 	getArgNames () const
+        - [ ] Init * 	resolveReferences (Resolver &R) const override
+        - [ ] bool 	isConcrete () const override
+        - [ ] std::string 	getAsString () const override
+        - [x] `do not need support` const_arg_iterator arg_begin () const
+        - [x] `do not need support`   const_arg_iterator arg_end () const
+        - [x] `do not need support`size_t 	arg_size () const
+        - [x] `do not need support`bool 	arg_empty () const
+        - [x] `do not need support`const_name_iterator 	name_begin () const
+        - [x] `do not need support`const_name_iterator 	name_end () const
+        - [x] `do not need support`size_t 	name_size () const
+        - [x] `do not need support`bool 	name_empty () const
+        - [ ] Init * 	getBit (unsigned Bit) const override

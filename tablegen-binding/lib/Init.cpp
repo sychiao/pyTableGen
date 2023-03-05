@@ -45,8 +45,8 @@ void def_Init(py::module &m) {
       .value("IK_First",                BindInit::InitKind::IK_First)
       .value("IK_FirstTypedInit",       BindInit::InitKind::IK_FirstTypedInit)
       .value("IK_BitInit",              BindInit::InitKind::IK_BitInit)
-      .value("IK_BitsInit",             BindInit::InitKind::IK_FirstTypedInit)
-      .value("IK_DagInit",              BindInit::InitKind::IK_BitsInit)
+      .value("IK_BitsInit",             BindInit::InitKind::IK_BitsInit)
+      .value("IK_DagInit",              BindInit::InitKind::IK_DagInit)
       .value("IK_DefInit",              BindInit::InitKind::IK_DefInit)
       .value("IK_IntInit",              BindInit::InitKind::IK_IntInit)
       .value("IK_ListInit",             BindInit::InitKind::IK_ListInit)
@@ -105,13 +105,15 @@ void def_Init(py::module &m) {
 
     // ListInit 
     py::class_<ListInit, TypedInit>(m, "ListInit")
-      .def("getElement",    &llvm::ListInit::getElement)
-      .def("isConcrete",    &llvm::ListInit::isConcrete)
-      .def("getAsString",   &llvm::ListInit::getAsString)
-      .def("isComplete",    &llvm::ListInit::isComplete)
-      .def("size",          &llvm::ListInit::size)
-      .def("empty",         &llvm::ListInit::empty)
-      .def("getBit",        &llvm::ListInit::getBit)
+      .def("getElement",         &llvm::ListInit::getElement)
+      .def("getElementType",     &llvm::ListInit::getElementType, py::return_value_policy::reference)
+      .def("getElementAsRecord", &llvm::ListInit::getElementAsRecord, py::return_value_policy::reference)
+      .def("isConcrete",         &llvm::ListInit::isConcrete)
+      .def("getAsString",        &llvm::ListInit::getAsString)
+      .def("isComplete",         &llvm::ListInit::isComplete)
+      .def("size",               &llvm::ListInit::size)
+      .def("empty",              &llvm::ListInit::empty)
+      .def("getBit",             &llvm::ListInit::getBit)
     ;
 
     // IntInit
@@ -119,6 +121,7 @@ void def_Init(py::module &m) {
       .def("getValue",    &llvm::IntInit::getValue)
       .def("getAsString", &llvm::IntInit::getAsString)
       .def("isConcrete",  &llvm::IntInit::isConcrete)
+      .def("getBit", &llvm::IntInit::getBit)
     ;
 
     // StringInit
@@ -143,4 +146,15 @@ void def_Init(py::module &m) {
       .def("getAsString", &llvm::VarInit::getAsString)
     ;
 
+    //DagInit
+    py::class_<DagInit, TypedInit>(m, "DagInit")
+    .def("getOperator", &llvm::DagInit::getOperator, py::return_value_policy::reference)
+    .def("getName", &llvm::DagInit::getName, py::return_value_policy::reference)
+    .def("getNameStr", [](DagInit &Self){return Self.getNameStr().str();})
+    .def("getNumArgs", &llvm::DagInit::getNumArgs)
+    .def("getArg", &llvm::DagInit::getArg, py::return_value_policy::reference)
+    .def("getArgName", &llvm::DagInit::getArgName)
+    .def("getArgs", [](DagInit &Self){return Self.getArgs().vec();})
+    .def("getArgNames", [](DagInit &Self){return Self.getArgNames().vec();})
+    ;
 }

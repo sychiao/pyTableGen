@@ -10,7 +10,7 @@ find_package(Python COMPONENTS Interpreter Development)
 add_subdirectory(pybind11)
 
 if(NOT DEFINED LLVM_MAIN_SRC_DIR)
-    set(LLVM_PREFIX /home/ycsu/Develop/TableGen.py-dev/llvm-project/install)
+	#set(LLVM_PREFIX <set path of llvm install prefix>)
     set(LLVM_DIR ${LLVM_PREFIX}/lib/cmake/llvm)
     find_package(LLVM REQUIRED CONFIG)
     message(STATUS "Using LLVM ${LLVM_PACKAGE_VERSION}")
