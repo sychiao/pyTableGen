@@ -21,7 +21,7 @@ if(NOT DEFINED LLVM_MAIN_SRC_DIR)
     include(AddLLVM)
 endif()
 
-set (CMAKE_CXX_STANDARD 14)
+#set (CMAKE_CXX_STANDARD 14)
 
 pybind11_add_module(tablegen 
     SHARED
