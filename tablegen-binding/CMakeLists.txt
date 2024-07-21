@@ -33,12 +33,12 @@ pybind11_add_module(tablegen
     lib/RecTy.cpp
 )
 
-message(STATUS "install tablegen binding to ${CMAKE_CURRENT_SOURCE_DIR}/../src/tablegen")
+message(STATUS "install tablegen binding to ${CMAKE_BINARY_DIR}/pyTableGen/src/tablegen")
 
 set_target_properties(tablegen
     PROPERTIES
     OUTPUT_NAME binding
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../src/tablegen"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyTableGen/src/tablegen"
 )
 
 target_include_directories(tablegen PUBLIC

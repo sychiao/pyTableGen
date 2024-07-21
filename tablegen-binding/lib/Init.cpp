@@ -61,7 +61,7 @@ void def_Init(py::module &m) {
       .value("IK_AnonymousNameInit",    BindInit::InitKind::IK_AnonymousNameInit)
       .value("IK_StringInit",           BindInit::InitKind::IK_StringInit)
       .value("IK_VarInit",              BindInit::InitKind::IK_VarInit)
-      .value("IK_VarListElementInit",   BindInit::InitKind::IK_VarListElementInit)
+      // .value("IK_VarListElementInit",   BindInit::InitKind::IK_VarListElementInit)
       .value("IK_VarBitInit",           BindInit::InitKind::IK_VarBitInit)
       .value("IK_VarDefInit",           BindInit::InitKind::IK_VarDefInit)
       .value("IK_LastTypedInit",        BindInit::InitKind::IK_LastTypedInit)

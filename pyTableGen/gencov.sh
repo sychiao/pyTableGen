@@ -7,5 +7,5 @@ lcov -e cov_data/merge.info -o cov_data/final.info \
     '*lib/TableGen/*' \
     '*include/llvm/TableGen/*' \
     '*/TableGen.py/src/tablegen/*' \
-    '*/pyTableGen/tablegen-binding/*' 
+    '*/pyTableGen/tablegen-binding/*'
 genhtml cov_data/final.info -o cov_report

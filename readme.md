@@ -6,6 +6,12 @@ py-TableGen provide an binding for tablegen, so we can develop tablegen backend 
 And we can use python to analysis exists td file(table describption), and edit them.
 An python based embedded TableGEn-like language also provide.
 
+## Install and Build
+pyTableGen binding to LLVMTableGen and source of TableGen, 
+so it need to build with LLVM, python code will copy to build directory.
+just `add_subdirectoy` to LLVM repo.
+
+
 # Progress Record
 ## TableGen Binding
   - [ ] TableGen Binding Support, LLVMTableGen Coverage should over 50%
