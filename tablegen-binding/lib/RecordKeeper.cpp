@@ -8,6 +8,7 @@
 #include "llvm/TableGen/Error.h"
 #include "llvm/TableGen/Main.h"
 #include "llvm/TableGen/Record.h"
+#include "BindType.h"
 
 #include <iostream>
 
@@ -16,7 +17,7 @@ using namespace llvm;
 
 struct RecordKeeper_Impl {
   static std::map<std::string, Record*, std::less<>> getClasses(llvm::RecordKeeper &Self) {
-    std::map<std::string, Record*, std::less<>> ret;     
+    std::map<std::string, Record*, std::less<>> ret;
     for (const auto& kv : Self.getClasses()) {
           ret[kv.first] = kv.second.get();
     }
@@ -24,7 +25,7 @@ struct RecordKeeper_Impl {
   }
 
   static std::map<std::string, Record*, std::less<>> getDefs(llvm::RecordKeeper &Self) {
-    std::map<std::string, Record*, std::less<>> ret;     
+    std::map<std::string, Record*, std::less<>> ret;
     for (const auto& kv : Self.getDefs()) {
           ret[kv.first] = kv.second.get();
     }
@@ -46,11 +47,8 @@ struct RecordKeeper_Impl {
   }
 };
 
-void def_RecordKeeper(py::module &m) {
-    //py::bind_map<std::map<std::string, Record*>>(m, "RecordMap");
-
-    py::class_<llvm::RecordKeeper>(m, "RecordKeeper")
-      .def(py::init<>())
+void def_RecordKeeper(pyRecordKeeperClass &cls) {
+    cls.def(py::init<>())
       .def("getInputFilename", [](llvm::RecordKeeper &Self) {
             return Self.getInputFilename();
         }, py::return_value_policy::reference)

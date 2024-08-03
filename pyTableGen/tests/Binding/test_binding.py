@@ -64,7 +64,7 @@ def test_4():
     root = os.path.dirname(__file__)
     ret = tablegen.binding.ParseTableGen(f"{root}/A.td")
     rec = ret.getClass("Template")
-    
+
     for targs in rec.getTemplateArgs():
         print(targs, targs.getAsString(), targs.getKind(), rec.isTemplateArg(targs))
     print(">")
@@ -78,7 +78,7 @@ def test_5():
     root = os.path.dirname(__file__)
     ret = tablegen.binding.ParseTableGen(f"{root}/A.td")
     rec = ret.getDef("XX")
-    
+
     for value in rec.getValues():
         print(value.getTypeName(), f"Name:{value.getName()}", f"=({value.getValue().getKind()})" , value.getValue().getAsString())
         print(value.getValue().getOperator().getAsString())

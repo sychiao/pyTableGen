@@ -85,4 +85,4 @@ m._getIns()
 # add init function with arguments Name, Opcode, Operands, Properties
 #RecordClass("Instruction")\
 #    .init(Name="str", Opcode="int", Operands="list<Operand>", Properties="list<Property>")
-    
+

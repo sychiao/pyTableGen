@@ -6,7 +6,7 @@ project(tablegen-py)
 #  message(STATUS "Not find pybind11 try to download one")
 #  include(cmake/pybind11.cmake)
 #endif()
-find_package(Python COMPONENTS Interpreter Development)
+
 add_subdirectory(pybind11)
 
 if(NOT DEFINED LLVM_MAIN_SRC_DIR)
@@ -23,7 +23,7 @@ endif()
 
 #set (CMAKE_CXX_STANDARD 14)
 
-pybind11_add_module(tablegen 
+pybind11_add_module(tablegen
     SHARED
     main_module.cpp
     lib/RecordKeeper.cpp
@@ -39,6 +39,13 @@ set_target_properties(tablegen
     PROPERTIES
     OUTPUT_NAME binding
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyTableGen/src/tablegen"
+)
+
+# pybind11-stubgen -o . tablegen.binding
+add_custom_command(TARGET tablegen POST_BUILD
+    COMMAND ${Python3_EXECUTABLE} -m pybind11_stubgen -o . tablegen.binding
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pyTableGen/src/
+    COMMENT "Generating .pyi files using pybind11-stubgen"
 )
 
 target_include_directories(tablegen PUBLIC
