@@ -22,4 +22,5 @@ void def_Type(py::module& m) {
     py::bind_map<RecordMap>(m, "RecordMap");
     py::bind_vector<InitVector>(m, "InitVector");
     py::bind_vector<StringInitVector>(m, "StringInitVector");
+    py::bind_vector<SuperClassVector>(m, "SuperClassVector");
 }

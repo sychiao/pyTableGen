@@ -59,13 +59,16 @@ PYBIND11_MODULE(binding, m) {
     auto binopcls = pyBinOpInitClass(m, "BinOpInit");
     auto recordrecTycls = pyRecordRecTyClass(m, "RecordRecTy");
     auto stringinitcls = pyStringInitClass(m, "StringInit");
+    auto smrangeclass = pySMRangeClass(m, "SMRange");
 
     /* for pybind11-stubgen we need define class first then define method*/
     def_Type(m);
     def_SMLoc(smloccls);
-    def_Init(initcls);
-    def_StringInit(stringinitcls);
     def_InitKind(m);
+    def_Init(initcls);
+    def_TypedInit(typedinitcls);
+    def_BinOpInit(binopcls);
+    def_StringInit(stringinitcls);
     def_other_Init(m);
     def_Record(recordcls);
     def_RecordRecTy(m, recordrecTycls);

@@ -20,6 +20,8 @@ void def_RecordVal(pyRecordValClass &cls) {
      .def("getTypeName", [](RecordVal &Self){return Self.getType()->getAsString(); })
      .def("getNameInit", [](RecordVal &Self){return Self.getNameInit(); }, py::return_value_policy::reference)
      .def("getValue", [](RecordVal &Self){return Self.getValue(); }, py::return_value_policy::reference)
+     .def("isTemplateArg", &RecordVal::isTemplateArg)
+     .def("isUsed", &RecordVal::isUsed)
     ;
 }
 
@@ -60,6 +62,10 @@ struct BindRecordImpl {
     return Self.isSubClassOf(name);
   }
 
+  static std::vector<std::pair<Record*, SMRange>> getSuperClasses(Record &Self) {
+    return Self.getSuperClasses().vec();
+  }
+
 };
 
 void def_SMLoc(pySMLocClass &cls) {
@@ -77,6 +83,7 @@ void def_Record(pyRecordClass &cls) {
       .def("getForwardDeclarationLocs", *BindRecordImpl::getForwardDeclarationLocs)
       .def("getTemplateArgs", &BindRecordImpl::getTemplateArgs)
       .def("isTemplateArg", &Record::isTemplateArg)
+      .def("getSuperClasses", &BindRecordImpl::getSuperClasses)
       .def("getType", &llvm::Record::getType, py::return_value_policy::reference)
       .def("getRecords", &llvm::Record::getRecords)
       .def("isAnonymous", &llvm::Record::isAnonymous)

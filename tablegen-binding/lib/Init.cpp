@@ -54,7 +54,7 @@ void def_InitKind(py::module &m) {
       .value("IK_IntInit",              BindInit::InitKind::IK_IntInit)
       .value("IK_ListInit",             BindInit::InitKind::IK_ListInit)
       .value("IK_FirstOpInit",          BindInit::InitKind::IK_FirstOpInit)
-      .value("IK_BinOpInit",           BindInit::InitKind::IK_BinOpInit)
+      .value("IK_BinOpInit",            BindInit::InitKind::IK_BinOpInit)
       .value("IK_TernOpInit",           BindInit::InitKind::IK_TernOpInit)
       .value("IK_UnOpInit",             BindInit::InitKind::IK_UnOpInit)
       .value("IK_LastOpInit",           BindInit::InitKind::IK_LastOpInit)
@@ -70,7 +70,7 @@ void def_InitKind(py::module &m) {
       .value("IK_VarDefInit",           BindInit::InitKind::IK_VarDefInit)
       .value("IK_LastTypedInit",        BindInit::InitKind::IK_LastTypedInit)
       .value("IK_UnsetInit",            BindInit::InitKind::IK_UnsetInit)
-      .value("IK_ArgumentInit",         BindInit::InitKind::IK_ArgumentInit)
+      //.value("IK_ArgumentInit",         BindInit::InitKind::IK_ArgumentInit)
     ;
 
     class BindBinOpInit : public BinOpInit {
@@ -82,7 +82,7 @@ void def_InitKind(py::module &m) {
       .value("ADD", BindBinOpInit::ADD)
       .value("SUB", BindBinOpInit::SUB)
       .value("MUL", BindBinOpInit::MUL)
-      .value("DIV", BindBinOpInit::DIV)
+      //.value("DIV", BindBinOpInit::DIV)
       .value("OR", BindBinOpInit::OR)
       .value("AND", BindBinOpInit::AND)
       .value("XOR", BindBinOpInit::XOR)
@@ -95,6 +95,7 @@ void def_InitKind(py::module &m) {
 void def_TypedInit(pyTypedInitClass &cls) {
     cls.def_static("cast", &casInit2TypedInit)
       .def_static("classof", &llvm::TypedInit::classof)
+      .def("getType", &llvm::TypedInit::getType, py::return_value_policy::reference)
     ;
 }
 
@@ -104,6 +105,8 @@ void def_OpInit(pyOpInitClass &cls) {
 
 void def_BinOpInit(pyBinOpInitClass &cls) {
     cls.def("getOpcode", &llvm::BinOpInit::getOpcode);
+    cls.def("getLHS", &llvm::BinOpInit::getLHS, py::return_value_policy::reference);
+    cls.def("getRHS", &llvm::BinOpInit::getRHS, py::return_value_policy::reference);
 }
 
 void def_StringInit(pyStringInitClass &cls) {
@@ -111,6 +114,7 @@ void def_StringInit(pyStringInitClass &cls) {
       .def("getAsString", &BindStringInitImpl::getAsString)
       .def("getAsUnquotedString", &BindStringInitImpl::getAsUnquotedString)
       .def("isConcrete", &llvm::StringInit::isConcrete)
+      .def("getFormat", &llvm::StringInit::getFormat)
     ;
 }
 
@@ -118,6 +122,7 @@ void def_Init(pyInitClass &cls) {
     cls.def("getAsString", &llvm::Init::getAsString)
       .def("isConcrete", &llvm::Init::isConcrete)
       .def("getBit", &llvm::Init::getBit)
+      .def("getKind", &llvm::Init::getKind)
     ;
 }
 

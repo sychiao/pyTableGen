@@ -18,6 +18,7 @@ using InitVector = std::vector<Init*>;
 using StringInitVector = std::vector<StringInit*>;
 using RecordMap = std::map<std::string, Record*, std::less<>>;
 using SMLocVector = std::vector<SMLoc>;
+using SuperClassVector = std::vector<std::pair<Record*, SMRange>>;
 
 PYBIND11_MAKE_OPAQUE(RecordVector)
 PYBIND11_MAKE_OPAQUE(RecordValVector)
@@ -26,6 +27,7 @@ PYBIND11_MAKE_OPAQUE(RecordMap)
 PYBIND11_MAKE_OPAQUE(SMLocVector)
 PYBIND11_MAKE_OPAQUE(InitVector)
 PYBIND11_MAKE_OPAQUE(StringInitVector)
+PYBIND11_MAKE_OPAQUE(SuperClassVector)
 
 using pyRecordKeeperClass = py::class_<llvm::RecordKeeper>;
 using pyRecordClass = py::class_<llvm::Record>;
@@ -49,6 +51,7 @@ using pyTypedInitClass = py::class_<TypedInit, Init>;
 using pyOpInitClass = py::class_<OpInit, TypedInit>;
 using pyBinOpInitClass = py::class_<BinOpInit, OpInit>;
 using pyStringInitClass = pybind11::class_<llvm::StringInit, llvm::TypedInit>;
+using pySMRangeClass = pybind11::class_<llvm::SMRange>;
 
 void def_InitKind(py::module &m);
 void def_other_Init(py::module &m);

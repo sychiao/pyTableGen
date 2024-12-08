@@ -7,7 +7,7 @@ project(tablegen-py)
 #  include(cmake/pybind11.cmake)
 #endif()
 
-add_subdirectory(pybind11)
+# add_subdirectory(pybind11)
 
 if(NOT DEFINED LLVM_MAIN_SRC_DIR)
 	#set(LLVM_PREFIX <set path of llvm install prefix>)
@@ -42,11 +42,15 @@ set_target_properties(tablegen
 )
 
 # pybind11-stubgen -o . tablegen.binding
-add_custom_command(TARGET tablegen POST_BUILD
-    COMMAND ${Python3_EXECUTABLE} -m pybind11_stubgen -o . tablegen.binding
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pyTableGen/src/
-    COMMENT "Generating .pyi files using pybind11-stubgen"
-)
+if(${Found_pybind11_stubgen} EQUAL 0)
+    add_custom_command(TARGET tablegen POST_BUILD
+        COMMAND ${Python3_EXECUTABLE} -m pybind11_stubgen -o . tablegen.binding
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pyTableGen/src/
+        COMMENT "Generating .pyi files using pybind11-stubgen"
+    )
+else()
+    message(WARNING "pybind11_stubgen not found, skip generating .pyi files")
+endif()
 
 target_include_directories(tablegen PUBLIC
     ${LLVM_MAIN_SRC_DIR}/lib/TableGen
