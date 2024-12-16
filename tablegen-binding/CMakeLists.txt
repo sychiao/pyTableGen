@@ -38,14 +38,14 @@ message(STATUS "install tablegen binding to ${CMAKE_BINARY_DIR}/pyTableGen/src/t
 set_target_properties(tablegen
     PROPERTIES
     OUTPUT_NAME binding
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyTableGen/src/tablegen"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../pyTableGen/src/tablegen"
 )
 
 # pybind11-stubgen -o . tablegen.binding
 if(${Found_pybind11_stubgen} EQUAL 0)
     add_custom_command(TARGET tablegen POST_BUILD
         COMMAND ${Python3_EXECUTABLE} -m pybind11_stubgen -o . tablegen.binding
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pyTableGen/src/
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../pyTableGen/src
         COMMENT "Generating .pyi files using pybind11-stubgen"
     )
 else()
