@@ -33,14 +33,19 @@ class TableGenContext:
         else:
             if isinstance(value, binding.VarInit):
                 return Var(value.getName())
+            return value.getAsString()
+            '''
+            TODO: Implement Init Parsing
             if isinstance(value, binding.BinOpInit):
                 value: binding.BinOpInit
-                print("###>>", value.getOpcode())
+                print("##x#>>", value.getAsString())
                 lhs = value.getLHS()
                 rhs = value.getRHS()
+                print("###>>", lhs.getAsString())
                 return BinOP(value.getOpcode(),
                              self.getValue(lhs.getType(), lhs),
                              self.getValue(rhs.getType(), rhs))
+            '''
 
     def setField(self, rec: TableGenRecord, record: binding.Record):
         for value in record.getValues():
@@ -56,7 +61,8 @@ class TableGenContext:
                 rec.fields[valuename] = TableGenField(valuename, type_, value_)
 
     def getType(self, typename):
-        match typename:
+        origin, *arg = typename.replace('>', '').split('<')
+        match origin:
             case 'dag':
                 return dag
             case 'int':
@@ -66,6 +72,8 @@ class TableGenContext:
             case 'string':
                 return str
             case 'bit':
+                return bit
+            case 'bits':
                 return bit
             case _:
                 try:
@@ -97,8 +105,8 @@ class TableGenLoader:
     def __init__(self):
         pass
 
-    def load(self, filename):
-        Recs = binding.ParseTableGen(filename)
+    def load(self, filename, incdirs):
+        Recs = binding.ParseTableGen(filename, incdirs)
         return self.__load(Recs)
 
     def __load(self, Recs: binding.RecordKeeper):

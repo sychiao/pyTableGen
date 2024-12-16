@@ -17,6 +17,16 @@ class bit:
     def __repr__(self) :
         return str(self.v)
 
+class bits:
+    def __init__(self, v):
+        self.v = v
+
+    def __eq__(self, other):
+        return self.v == other.v
+
+    def __repr__(self) :
+        return str(self.v)
+
 class BinOP:
     def __init__(self, BINOP, LHS, RHS):
         self.BINOP = BINOP
