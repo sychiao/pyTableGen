@@ -11,9 +11,9 @@ llvm_path = os.path.join(source_path, '..', '..', '..', 'llvm')
 incDir = os.path.join(llvm_path, 'include')
 TargetDir = os.path.join(llvm_path, 'lib', 'Target', 'RISCV')
 riscv_td = os.path.join(TargetDir, 'RISCV.td')
-print(riscv_td)
-ctx = TableGenLoader().load(riscv_td, [incDir, TargetDir])
+#print(riscv_td)
+#ctx = TableGenLoader().load(riscv_td, [incDir, TargetDir])
 
-import pickle
-with open("riscv_td.pkl", "wb") as f:
-    pickle.dump(ctx, f)
+#import pickle
+#with open("riscv_td.pkl", "wb") as f:
+#    pickle.dump(ctx, f)

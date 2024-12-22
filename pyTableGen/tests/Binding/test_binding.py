@@ -1,6 +1,50 @@
 import tablegen.binding
 import os
 
+def test_0():
+    print("Test_0_Binding")
+    content = '''
+class base1;
+class base2;
+class A : base1, base2 {
+    int a = 1;
+    bits<4> b = 13;
+}
+
+def xA : A;
+
+#ifdef Auto
+def AutoX : A;
+#endif
+
+#ifdef Error
+Kjlkjlkjlkjlkja;lkdsjf;alksdjf;laksjdf;lkasjdflk;
+#endif
+
+class B {
+    int a = 1;
+    bits<4> b = 12;
+    bit c = 1;
+    list<int> x = [1, 2, 3];
+    dag y =(xA 1, 2, 3);
+    A z;
+}
+
+def xB : A, B;
+'''
+    with open("a_test.td", 'w') as f:
+        f.write(content)
+    Recs2 = tablegen.binding.ParseTableGen(f'a_test.td')
+    assert Recs2.getDef("AutoX") is None
+    Recs3 = tablegen.binding.ParseTableGen(f'a_test.td', [], ["Auto"])
+    assert Recs3.getDef("AutoX") is not None
+    assert Recs3.getInputFilename() == 'a_test.td'
+    Recs4 = tablegen.binding.ParseTableGen(f'a_test.td', [], ["Error"])
+    assert Recs4 is None
+    Recs5 = tablegen.binding.ParseTableGen(f'___.td', [], ["Error"])
+    assert Recs5 is None
+    
+
 def test_1():
     root = os.path.dirname(__file__)
     ret = tablegen.binding.ParseTableGen(f"{root}/A.td")

@@ -4,6 +4,9 @@
 #include "TGParser.h"
 #include "BindType.h"
 #include "BindImpl.h"
+#include "BindRecTy.h"
+#include "BindInit.h"
+#include "BindRecord.h"
 
 using namespace llvm;
 
@@ -20,7 +23,7 @@ RecordKeeper* _ParseTableGen(std::string InputFileName,
 
     srcMgr.AddNewSourceBuffer(std::move(*FileOrErr), SMLoc());
     srcMgr.setIncludeDirs(IncludeDirs);
-    if (TableGenParseFile(srcMgr, *records))
+    if (TableGenParseFile(srcMgr, *records, Macros))
         return nullptr;
     /*
     TGParser Parser(srcMgr, Macros, *records);
@@ -46,36 +49,17 @@ PYBIND11_MODULE(binding, m) {
     m.attr("__name__") = "tablegen.binding";
     m.doc() = "pybind11 example plugin";
 
-    auto recordkeepercls = pyRecordKeeperClass(m, "RecordKeeper");
-    auto smloccls = pySMLocClass(m, "SMLoc");
-    auto recordcls = pyRecordClass(m, "Record");
-    auto recordvalcls = pyRecordValClass(m, "RecordVal");
-    auto recTyKindEnum = pyRecTyKindEnum(m, "RecTyKind");
-    auto recTycls = pyRecTyClass(m, "RecTy");
-
-    auto initcls = pyInitClass(m, "Init");
-    auto typedinitcls = pyTypedInitClass(m, "TypedInit");
-    auto opinitcls = pyOpInitClass(m, "OpInit");
-    auto binopcls = pyBinOpInitClass(m, "BinOpInit");
-    auto recordrecTycls = pyRecordRecTyClass(m, "RecordRecTy");
-    auto stringinitcls = pyStringInitClass(m, "StringInit");
-    auto smrangeclass = pySMRangeClass(m, "SMRange");
-
     /* for pybind11-stubgen we need define class first then define method*/
+
     def_Type(m);
-    def_SMLoc(smloccls);
-    def_InitKind(m);
-    def_Init(initcls);
-    def_TypedInit(typedinitcls);
-    def_BinOpInit(binopcls);
-    def_StringInit(stringinitcls);
-    def_other_Init(m);
-    def_Record(recordcls);
-    def_RecordRecTy(m, recordrecTycls);
-    def_RecordKeeper(recordkeepercls);
-    def_RecordVal(recordvalcls);
-    def_RecTy(recTycls);
-    def_RecTyKind(recTyKindEnum);
+    _RecordBindingImpl RecordBindingImpl(m);
+    _RecTyBindingImpl RecTyBinding(m);
+    _InitBindingImpl InitBinding(m);
+
+    /*define method*/
+    RecordBindingImpl.def();
+    RecTyBinding.def();
+    InitBinding.def();
 
     m.def("ParseTableGen",
         py::overload_cast<std::string>(&ParseTableGen));

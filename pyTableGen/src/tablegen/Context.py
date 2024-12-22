@@ -50,15 +50,17 @@ class TableGenContext:
     def setField(self, rec: TableGenRecord, record: binding.Record):
         for value in record.getValues():
             valuename = value.getName()
+            '''
             type_ = self.getType(value.getTypeName())
             # if value.
             value_ = self.getValue(type_, value.getValue())
             if value.isTemplateArg():
-                rec.args[valuename] = TableGenField(valuename, type_, value_)
+                rec.args[valuename] = (valuename, type_, value_)
             elif value.getName().startswith("__Arg_"):
-                rec.defargs[valuename] = TableGenField(valuename, type_, value_)
+                rec.defargs[valuename] = (valuename, type_, value_)
             else:
-                rec.fields[valuename] = TableGenField(valuename, type_, value_)
+                rec.fields[valuename] = (valuename, type_, value_)
+            '''
 
     def getType(self, typename):
         origin, *arg = typename.replace('>', '').split('<')
@@ -99,17 +101,21 @@ class TableGenContext:
                 return False
 
         return True
-
+import time
 class TableGenLoader:
 
     def __init__(self):
         pass
 
-    def load(self, filename, incdirs):
+    def load(self, filename, incdirs=None):
+        s = time.time()
+        incdirs = incdirs or list()
         Recs = binding.ParseTableGen(filename, incdirs)
+        print("ParseTableGen", time.time() - s)
         return self.__load(Recs)
 
     def __load(self, Recs: binding.RecordKeeper):
+        s = time.time()
         ctx = TableGenContext()
         for name, record in Recs.getClasses().items():
             ctx.addClass(name, TableGenClass(name))
@@ -118,16 +124,25 @@ class TableGenLoader:
             cls = ctx.classes[name]
             for superclass, _ in record.getSuperClasses():
                 cls.superclasses.append(ctx.classes[superclass.getName()])
+        print("Create Object", time.time() - s)
 
+        s = time.time()
         for name, record in Recs.getDefs().items():
             superClses = \
                 [ctx.classes[superclass.getName()] for superclass, _ in record.getSuperClasses()]
             ctx.addDef(name, TableGenRecord(name, superClses))
 
+        print("Create Def", time.time() - s)
+        s = time.time()
+
         for name, record in Recs.getClasses().items():
             ctx.setField(ctx.classes[name], record)
 
+        print("Set Fields Class", time.time() - s)
+        s = time.time()
+
         for name, record in Recs.getDefs().items():
             ctx.setField(ctx.defs[name], record)
+        print("Set Fields Obj", time.time() - s)
 
         return ctx

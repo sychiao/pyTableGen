@@ -1,6 +1,5 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl_bind.h>
-
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -8,7 +7,9 @@
 #include "llvm/TableGen/Error.h"
 #include "llvm/TableGen/Main.h"
 #include "llvm/TableGen/Record.h"
+
 #include "BindType.h"
+#include "BindRecord.h"
 
 #include <iostream>
 
@@ -47,7 +48,7 @@ struct RecordKeeper_Impl {
   }
 };
 
-void def_RecordKeeper(pyRecordKeeperClass &cls) {
+void _RecordBindingImpl::_def(pyRecordKeeperClass &cls) {
     cls.def(py::init<>())
       .def("getInputFilename", [](llvm::RecordKeeper &Self) {
             return Self.getInputFilename();

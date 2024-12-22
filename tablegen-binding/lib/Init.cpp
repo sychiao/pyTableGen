@@ -2,6 +2,7 @@
 #include <pybind11/stl_bind.h>
 
 #include "BindType.h"
+#include "BindInit.h"
 
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
@@ -21,30 +22,8 @@ TypedInit* casInit2TypedInit(Init* init) {
   return llvm::dyn_cast<TypedInit, Init>(init);
 }
 
-struct BindStringInitImpl {
-  static std::string getValue(StringInit &Self) {
-    return Self.getValue().str();
-  }
-
-  static std::string getAsString(StringInit &Self) {
-    return Self.getAsString();
-  }
-
-  static std::string getAsUnquotedString(StringInit &Self) {
-    return Self.getAsUnquotedString();
-  }
-
-};
-
-class BindInit : public Init { // helper type for exposing protected functions
-public:
-    using Init::InitKind; // inherited with different access modifier
-};
-
-void def_InitKind(py::module &m) {
-    // InitKind
-     py::enum_<BindInit::InitKind>(m, "InitKind")
-      .value("IK_First",                BindInit::InitKind::IK_First)
+void _InitBindingImpl::_def(pyInitKindEnum &kind) {
+  kind.value("IK_First",                BindInit::InitKind::IK_First)
       .value("IK_FirstTypedInit",       BindInit::InitKind::IK_FirstTypedInit)
       .value("IK_BitInit",              BindInit::InitKind::IK_BitInit)
       .value("IK_BitsInit",             BindInit::InitKind::IK_BitsInit)
@@ -72,14 +51,10 @@ void def_InitKind(py::module &m) {
       .value("IK_UnsetInit",            BindInit::InitKind::IK_UnsetInit)
       //.value("IK_ArgumentInit",         BindInit::InitKind::IK_ArgumentInit)
     ;
+}
 
-    class BindBinOpInit : public BinOpInit {
-    public:
-      using BinOpInit::BinaryOp;
-    };
-
-    py::enum_<BindBinOpInit::BinaryOp>(m, "BinaryOp")
-      .value("ADD", BindBinOpInit::ADD)
+void _InitBindingImpl::_def(pyBinaryOpEnum &kind) {
+  kind.value("ADD", BindBinOpInit::ADD)
       .value("SUB", BindBinOpInit::SUB)
       .value("MUL", BindBinOpInit::MUL)
       //.value("DIV", BindBinOpInit::DIV)
@@ -92,24 +67,50 @@ void def_InitKind(py::module &m) {
     ;
 }
 
-void def_TypedInit(pyTypedInitClass &cls) {
-    cls.def_static("cast", &casInit2TypedInit)
-      .def_static("classof", &llvm::TypedInit::classof)
+void _InitBindingImpl::_def(pyStringFormatEnum &cls) {
+  cls.value("SF_String", StringInit::StringFormat::SF_String)
+     .value("SF_Code", StringInit::StringFormat::SF_Code);
+}
+
+void _InitBindingImpl::_def(pyInitClass &cls) {
+    cls.def("getAsString", &llvm::Init::getAsString)
+      .def("isConcrete", &llvm::Init::isConcrete)
+      .def("getBit", &llvm::Init::getBit)
+      .def("getKind", &llvm::Init::getKind)
+    ;
+}
+
+void _InitBindingImpl::_def(pyTypedInitClass &cls) {
+    cls.def_static("classof", &llvm::TypedInit::classof)
       .def("getType", &llvm::TypedInit::getType, py::return_value_policy::reference)
     ;
 }
 
-void def_OpInit(pyOpInitClass &cls) {
+void _InitBindingImpl::_def(pyOpInitClass &cls) {
     cls.def("getNumOperands", &llvm::OpInit::getNumOperands);
 }
 
-void def_BinOpInit(pyBinOpInitClass &cls) {
+void _InitBindingImpl::_def(pyBinOpInitClass &cls) {
     cls.def("getOpcode", &llvm::BinOpInit::getOpcode);
     cls.def("getLHS", &llvm::BinOpInit::getLHS, py::return_value_policy::reference);
     cls.def("getRHS", &llvm::BinOpInit::getRHS, py::return_value_policy::reference);
 }
 
-void def_StringInit(pyStringInitClass &cls) {
+struct BindStringInitImpl {
+  static std::string getValue(StringInit &Self) {
+    return Self.getValue().str();
+  }
+
+  static std::string getAsString(StringInit &Self) {
+    return Self.getAsString();
+  }
+
+  static std::string getAsUnquotedString(StringInit &Self) {
+    return Self.getAsUnquotedString();
+  }
+};
+
+void _InitBindingImpl::_def(pyStringInitClass &cls) {
     cls.def("getValue", &BindStringInitImpl::getValue)
       .def("getAsString", &BindStringInitImpl::getAsString)
       .def("getAsUnquotedString", &BindStringInitImpl::getAsUnquotedString)
@@ -118,44 +119,33 @@ void def_StringInit(pyStringInitClass &cls) {
     ;
 }
 
-void def_Init(pyInitClass &cls) {
-    cls.def("getAsString", &llvm::Init::getAsString)
-      .def("isConcrete", &llvm::Init::isConcrete)
-      .def("getBit", &llvm::Init::getBit)
-      .def("getKind", &llvm::Init::getKind)
+void _InitBindingImpl::_def(pyBitInitClass &cls) {
+  cls.def("getValue",    &llvm::BitInit::getValue)
+     .def("getBit",      &llvm::BitInit::getBit)
+     .def("isConcrete",  &llvm::BitInit::isConcrete)
+     .def("getAsString", &llvm::BitInit::getAsString)
     ;
 }
 
-void def_other_Init(py::module &m) {
-
-    // BitInit
-    py::class_<BitInit, TypedInit>(m, "BitInit")
-      .def("getValue",    &llvm::BitInit::getValue)
-      .def("getBit",      &llvm::BitInit::getBit)
-      .def("isConcrete",  &llvm::BitInit::isConcrete)
-      .def("getAsString", &llvm::BitInit::getAsString)
-    ;
-
-    // BitsInit
-    py::class_<BitsInit, TypedInit>(m, "BitsInit")
-      .def("getBit",        &llvm::BitsInit::getBit)
+void  _InitBindingImpl::_def(pyBitsInitClass &cls){
+   cls.def("getBit",        &llvm::BitsInit::getBit)
       .def("isConcrete",    &llvm::BitsInit::isConcrete)
       .def("getAsString",   &llvm::BitsInit::getAsString)
       .def("getNumBits",    &llvm::BitsInit::getNumBits)
       .def("isComplete",    &llvm::BitsInit::isComplete)
       .def("allInComplete", &llvm::BitsInit::allInComplete)
     ;
+}
 
-    // DefInit
-    py::class_<DefInit, TypedInit>(m, "DefInit")
-      .def("isConcrete",    &llvm::DefInit::isConcrete)
+void _InitBindingImpl::_def(pyDefInitClass &cls) {
+  cls.def("isConcrete",    &llvm::DefInit::isConcrete)
       .def("getAsString",   &llvm::DefInit::getAsString)
       .def("getDef",        &llvm::DefInit::getDef)
     ;
+}
 
-    // ListInit
-    py::class_<ListInit, TypedInit>(m, "ListInit")
-      .def("getElement",         &llvm::ListInit::getElement)
+void _InitBindingImpl::_def(pyListInitClass &cls) {
+  cls.def("getElement",         &llvm::ListInit::getElement)
       .def("getElementType",     &llvm::ListInit::getElementType, py::return_value_policy::reference)
       .def("getElementAsRecord", &llvm::ListInit::getElementAsRecord, py::return_value_policy::reference)
       .def("isConcrete",         &llvm::ListInit::isConcrete)
@@ -165,33 +155,18 @@ void def_other_Init(py::module &m) {
       .def("empty",              &llvm::ListInit::empty)
       .def("getBit",             &llvm::ListInit::getBit)
     ;
+}
 
-    // IntInit
-    py::class_<IntInit, TypedInit>(m, "IntInit")
-      .def("getValue",    &llvm::IntInit::getValue)
+void _InitBindingImpl::_def(pyIntInitClass &cls) {
+  cls.def("getValue",    &llvm::IntInit::getValue)
       .def("getAsString", &llvm::IntInit::getAsString)
       .def("isConcrete",  &llvm::IntInit::isConcrete)
       .def("getBit", &llvm::IntInit::getBit)
     ;
+}
 
-    // StringInit
-    py::enum_<StringInit::StringFormat>(m, "StringFormat")
-      .value("SF_String", StringInit::StringFormat::SF_String)
-      .value("SF_Code", StringInit::StringFormat::SF_Code)
-    ;
-
-
-    // VarInit
-    py::class_<VarInit, TypedInit>(m, "VarInit")
-      .def("getName", [](VarInit &Self){return Self.getName().str();})
-      .def("getNameInit", &llvm::VarInit::getNameInit)
-      .def("getNameInitAsString", &llvm::VarInit::getNameInitAsString)
-      .def("getAsString", &llvm::VarInit::getAsString)
-    ;
-
-    //DagInit
-    py::class_<DagInit, TypedInit>(m, "DagInit")
-    .def("getOperator", &llvm::DagInit::getOperator, py::return_value_policy::reference)
+void _InitBindingImpl::_def(pyDagInitClass &cls) {
+  cls.def("getOperator", &llvm::DagInit::getOperator, py::return_value_policy::reference)
     .def("getName", &llvm::DagInit::getName, py::return_value_policy::reference)
     .def("getNameStr", [](DagInit &Self){return Self.getNameStr().str();})
     .def("getNumArgs", &llvm::DagInit::getNumArgs)
@@ -200,7 +175,22 @@ void def_other_Init(py::module &m) {
     .def("getArgs", [](DagInit &Self){return Self.getArgs().vec();})
     .def("getArgNames", [](DagInit &Self){return Self.getArgNames().vec();})
     ;
+}
 
+void def_other_Init(py::module &m) {
 
+    // StringInit
+    py::enum_<StringInit::StringFormat>(m, "StringFormat")
+      .value("SF_String", StringInit::StringFormat::SF_String)
+      .value("SF_Code", StringInit::StringFormat::SF_Code)
+    ;
+
+    // VarInit
+    py::class_<VarInit, TypedInit>(m, "VarInit")
+      .def("getName", [](VarInit &Self){return Self.getName().str();})
+      .def("getNameInit", &llvm::VarInit::getNameInit)
+      .def("getNameInitAsString", &llvm::VarInit::getNameInitAsString)
+      .def("getAsString", &llvm::VarInit::getAsString)
+    ;
 }
 

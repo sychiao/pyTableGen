@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl_bind.h>
 #include "BindType.h"
+#include "BindRecord.h"
 
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
@@ -14,10 +15,19 @@
 
 namespace py = pybind11;
 using namespace llvm;
+  
+void _RecordBindingImpl::_def(pySMLocClass &cls) {
+  cls.def("isValid", &SMLoc::isValid)
+     .def("getPointer", &SMLoc::getPointer);
+}
 
-void def_RecordVal(pyRecordValClass &cls) {
+void _RecordBindingImpl::_def(pySMRangeClass &cls) {
+}
+
+void _RecordBindingImpl::_def(pyRecordValClass &cls) {
   cls.def("getName", [](RecordVal &Self) {return Self.getName().str();})
      .def("getTypeName", [](RecordVal &Self){return Self.getType()->getAsString(); })
+     .def("getType", [](RecordVal &Self){return Self.getType();}, py::return_value_policy::reference)
      .def("getNameInit", [](RecordVal &Self){return Self.getNameInit(); }, py::return_value_policy::reference)
      .def("getValue", [](RecordVal &Self){return Self.getValue(); }, py::return_value_policy::reference)
      .def("isTemplateArg", &RecordVal::isTemplateArg)
@@ -68,12 +78,7 @@ struct BindRecordImpl {
 
 };
 
-void def_SMLoc(pySMLocClass &cls) {
-  cls.def("isValid", &SMLoc::isValid)
-     .def("getPointer", &SMLoc::getPointer);
-}
-
-void def_Record(pyRecordClass &cls) {
+void _RecordBindingImpl::_def(pyRecordClass &cls) {
     cls.def("getID", [](Record &Self) {return Self.getID();})
       .def("getNameInit", [](Record &Self) {return Self.getNameInit();}, py::return_value_policy::reference)
       .def("getDefInit",  [](Record &Self) {return Self.getDefInit();}, py::return_value_policy::reference)
