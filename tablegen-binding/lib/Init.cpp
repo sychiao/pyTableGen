@@ -140,7 +140,7 @@ void  _InitBindingImpl::_def(pyBitsInitClass &cls){
 void _InitBindingImpl::_def(pyDefInitClass &cls) {
   cls.def("isConcrete",    &llvm::DefInit::isConcrete)
       .def("getAsString",   &llvm::DefInit::getAsString)
-      .def("getDef",        &llvm::DefInit::getDef)
+      .def("getDef",        &llvm::DefInit::getDef, py::return_value_policy::reference)
     ;
 }
 
@@ -154,6 +154,7 @@ void _InitBindingImpl::_def(pyListInitClass &cls) {
       .def("size",               &llvm::ListInit::size)
       .def("empty",              &llvm::ListInit::empty)
       .def("getBit",             &llvm::ListInit::getBit)
+      .def("getValues",          [](ListInit &Self){return Self.getValues().vec();})
     ;
 }
 
