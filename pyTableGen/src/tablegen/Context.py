@@ -3,6 +3,20 @@ from typing import Type
 from .Units import TableGenType
 from .Units import TableGenField, TableGenRecord, TableGenClass, dag, bit, Var, BinOP
 
+'''
+class TableGenContext:
+    def __init__(self, RK: binding.RecordKeeper):
+        self.recordkeeper = RK
+    
+    def getClasses(self):
+        pass
+
+    def getDefswithClass(self, cls):
+        return (cls(rec) for rec in self.recordkeeper.getAllDerivedDefinitions(cls.__name__))
+'''
+
+
+
 class TableGenContext:
     classes: dict[str, TableGenClass]
 

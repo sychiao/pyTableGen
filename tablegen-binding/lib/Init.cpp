@@ -121,14 +121,14 @@ void _InitBindingImpl::_def(pyStringInitClass &cls) {
 
 void _InitBindingImpl::_def(pyBitInitClass &cls) {
   cls.def("getValue",    &llvm::BitInit::getValue)
-     .def("getBit",      &llvm::BitInit::getBit)
+     .def("getBit",      &llvm::BitInit::getBit, py::return_value_policy::reference)
      .def("isConcrete",  &llvm::BitInit::isConcrete)
      .def("getAsString", &llvm::BitInit::getAsString)
     ;
 }
 
 void  _InitBindingImpl::_def(pyBitsInitClass &cls){
-   cls.def("getBit",        &llvm::BitsInit::getBit)
+   cls.def("getBit",        &llvm::BitsInit::getBit, py::return_value_policy::reference)
       .def("isConcrete",    &llvm::BitsInit::isConcrete)
       .def("getAsString",   &llvm::BitsInit::getAsString)
       .def("getNumBits",    &llvm::BitsInit::getNumBits)
@@ -162,7 +162,7 @@ void _InitBindingImpl::_def(pyIntInitClass &cls) {
   cls.def("getValue",    &llvm::IntInit::getValue)
       .def("getAsString", &llvm::IntInit::getAsString)
       .def("isConcrete",  &llvm::IntInit::isConcrete)
-      .def("getBit", &llvm::IntInit::getBit)
+      .def("getBit", &llvm::IntInit::getBit, py::return_value_policy::reference)
     ;
 }
 
