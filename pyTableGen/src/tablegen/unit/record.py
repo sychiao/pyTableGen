@@ -4,35 +4,9 @@ import weakref
 from typing import ClassVar
 import typing
 
-class MetaTableGenType(type):
-    __types__: dict[str, type] = dict()
-
-    def __getitem__(cls, arg):
-        clsname = f'{cls.__name__}[{arg}]'
-        try:
-            return cls.__types__[clsname]
-        except KeyError:
-            cls.__types__[clsname] = type(f'{cls.__name__}[{arg}]', (cls,), {'Args': arg})
-            return cls.__types__[clsname]
-
-    def __instancecheck__(cls, instance, /) -> bool:
-        print('instance check', cls.__name__, cls.check(instance))
-        return cls.check(instance)
-
-    def check(cls, instance):
-        return super().__instancecheck__(instance)
-
-class TableGenType(metaclass=MetaTableGenType):
-    pass
-
-class Bits(TableGenType):
-    Length = -1
-
-    def __init__(self, bits):
-        self.bits = bits
-    
-    def __repr__(self):
-        return f'{self.__class__.__name__}({self.bits})'
+from ._base import LazyProperty, TableGenType
+from .bits import Bits
+from .dag import DAG
 
 def Init2Value(v: binding.Init , ctx=None):
     if isinstance(v, binding.IntInit):
@@ -76,9 +50,9 @@ class TableGenRecord(TableGenType):
 
     def __new__(cls, obj, ctx=None):
         #s = time.time()
-        if ctx and (ins := ctx.getRecord(obj.getName())):
-            return ins
-        elif cached := cls.__cached__.get(id(obj)):
+        #if ctx and (ins := ctx.getRecord(obj.getName())):
+        #    return ins
+        if cached := cls.__cached__.get(id(obj)):
             return cached
         if issubclass(obj.__class__, TableGenRecord):
             return obj
@@ -91,36 +65,28 @@ class TableGenRecord(TableGenType):
     def __init__(self, rec: binding.Record, ctx=None):
         self._rec = rec
         self._ctx = ctx
-        if ctx:
-            ctx.addRecord(self)
+        #if ctx:
+        #    ctx.addRecord(self)
     
-    @property
+    @LazyProperty
     def recname(self):
-        try:
-            return self._name
-        except:
-            self._name = self._rec.getName()
-            return self._name
+        return self._rec.getName()
 
-    @property
+    @LazyProperty
     def classes(self):
-        try:
-            return self._classes
-        except:
-            self._classes = tuple(record.getName() for record, _ in self._rec.getSuperClasses())
-            return self._classes
+        return tuple(record.getName() for record, _ in self._rec.getSuperClasses())
 
-    @property
+    @LazyProperty
     def bases(self):
-        try:
-            return self._base
-        except:
-            self._base = tuple(record.getName() for record in self._rec.getType().getClasses())
-            return self._base
+        return tuple(record.getName() for record in self._rec.getType().getClasses())
+    
+    @LazyProperty
+    def fields(self):
+        return {RecVal.getName() for RecVal in self._rec.getValues()}
 
     def __repr__(self):
         self.__late_init__()
-        fields = {key: self.__dict__[key] for key in self.fields()}
+        fields = {key: self.__dict__[key] for key in self.fields}
         return f"<{self._rec.getName()}: {self.bases} {fields}>"
 
     def __getattr__(self, key: str):
@@ -128,46 +94,27 @@ class TableGenRecord(TableGenType):
         self.__dict__[key] = Value
         return Value
 
-    def fields(self):
-        try:
-            return self._fields
-        except:
-            self._fields = {RecVal.getName() for RecVal in self._rec.getValues()}
-            return self._fields
-
     def __late_init__(self):
-        for key in self.fields():
+        for key in self.fields:
             if key not in self.__dict__:
                 self.__dict__[key] = Init2Value(self._rec.getValue(key).getValue(), self._ctx)
 
     @classmethod
     def check(cls, ins):
-        return cls.__name__ in getattr(ins, "_classes", [])
+        return cls.__name__ in ins.classes
 
     def cast(self, cls):
         if isinstance(self, cls):
             return cls(self._rec)
         return None
 
+    def safe_cast(self, cls) -> 'TableGenRecord':
+        if isinstance(self, cls):
+            return cls(self._rec)
+        return self
+
 class TypedRecord(TableGenRecord):
 
+    @LazyProperty
     def fields(self):
-        try:
-            return self._fields
-        except:
-            self._fields = {key for key, ty in type(self).__annotations__.items() if typing.get_origin(ty) != ClassVar}
-            return self._fields
-
-class dag:
-    pass
-
-class ValueType(TypedRecord):
-    Namespace: str
-    Size: int
-    Value: int
-
-class RegisterClass(TypedRecord):
-    Namespace: str
-    RegTypes: list[ValueType]
-    Size: int
-    MemberList: dag
+        return {key for key, ty in type(self).__annotations__.items() if typing.get_origin(ty) != ClassVar}

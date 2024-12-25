@@ -21,11 +21,18 @@ if(NOT DEFINED LLVM_MAIN_SRC_DIR)
     include(AddLLVM)
 endif()
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/LLVMSource.cpp.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/LLVMSource.cpp
+    @ONLY
+)
+
 #set (CMAKE_CXX_STANDARD 14)
 
 pybind11_add_module(tablegen
     SHARED
     main_module.cpp
+    LLVMSource.cpp
     lib/RecordKeeper.cpp
     lib/Init.cpp
     lib/Record.cpp

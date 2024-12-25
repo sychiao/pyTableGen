@@ -10,3 +10,8 @@ util/
 __pycache__/
 tests/__pycache__/
 *.so
+*.pkl
+*.profraw
+*.profdata
+pyTableGen/cov_data/
+pyTableGen/cov_report/

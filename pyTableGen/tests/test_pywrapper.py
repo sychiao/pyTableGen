@@ -1,4 +1,5 @@
-from tablegen.RecTy.type import TableGenRecord, TableGenContext
+from tablegen.unit.record import TableGenRecord
+from tablegen.context import TableGenContext
 
 import tablegen.binding as binding
 import os
@@ -43,6 +44,7 @@ def xC : C;
     with open("t_test.td", 'w') as f:
         f.write(content)
     Recs2 = binding.ParseTableGen(f't_test.td')
+    os.unlink('t_test.td')
 
     xBRec = Recs2.getDef('xB')
     ctx = TableGenContext()

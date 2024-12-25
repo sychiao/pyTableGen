@@ -10,6 +10,8 @@
 
 using namespace llvm;
 
+std::string getLLVMSourceRoot();
+
 RecordKeeper* _ParseTableGen(std::string InputFileName,
     std::vector<std::string> IncludeDirs,
     std::vector<std::string> Macros
@@ -61,6 +63,7 @@ PYBIND11_MODULE(binding, m) {
     RecTyBinding.def();
     InitBinding.def();
 
+    m.def("getLLVMSourceLoc", &getLLVMSourceRoot);
     m.def("ParseTableGen",
         py::overload_cast<std::string>(&ParseTableGen));
     m.def("ParseTableGen",

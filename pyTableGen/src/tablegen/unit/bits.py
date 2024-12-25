@@ -1,4 +1,4 @@
-from .type import TableGenType
+from ._base import TableGenType
 
 class Bits(TableGenType):
     Length = -1

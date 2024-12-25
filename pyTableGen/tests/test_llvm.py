@@ -5,14 +5,14 @@ source_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(source_path, '..', 'src'))
 print("PATH:", os.path.join(source_path, '..', 'src'))
 
-from tablegen.Context import TableGenLoader
-from tablegen.RecTy.type import TableGenType
+#from tablegen.Context import TableGenLoader
+#from tablegen.RecTy.type import TableGenType
 import tablegen.binding as binding
 
-from tablegen.RecTy.type import TableGenRecord, TableGenContext
+from tablegen.unit.record import TypedRecord
+from tablegen.context import TableGenContext
 
-
-llvm_path = os.path.join(source_path, '..', '..', '..', 'llvm')
+llvm_path = binding.getLLVMSourceLoc()
 incDir = os.path.join(llvm_path, 'include')
 TargetDir = os.path.join(llvm_path, 'lib', 'Target', 'RISCV')
 riscv_td = os.path.join(TargetDir, 'RISCV.td')
@@ -21,12 +21,12 @@ riscv_td = os.path.join(TargetDir, 'RISCV.td')
 
 Recs = binding.ParseTableGen(riscv_td, [incDir, TargetDir])
 
-class ValueType(TableGenType):
+class ValueType(TypedRecord):
     Namespace: str
     Size: int
     Value: int
 
-class RegisterClass(TableGenType):
+class RegisterClass(TypedRecord):
     Namespace: str
     RegTypes: list[ValueType]
     Size: int
@@ -40,21 +40,29 @@ import time
 a = time.time()
 Recs = binding.ParseTableGen(riscv_td, [incDir, TargetDir])
 s = time.time()
-ctx = TableGenContext()
-lst = list()
-for _, rec in Recs.getDefs().items():
-    lst.append(TableGenRecord(rec, ctx))
+ctx = TableGenContext(Recs)
+for rec in ctx.getDefs(RegisterClass):
+    print(rec.Size)
+
+x = time.time()
+
+for rec in ctx.getDefs("RegisterClass"):
+    print(rec.Size)
+
 e = time.time()
-
-for r in lst:
+for rec in ctx.getDefs(RegisterClass):
+    rec.__late_init__()
+m2 = time.time()
+for r in ctx.getDefs("RegisterClass"):
     r.__late_init__()
-
 e2 = time.time()
 
-sz = len(Recs.getDefs())
+sz = len(list(ctx.getDefs(RegisterClass)))
 print(f"Total parse file use {s-a} sec")
-print(f"  create {sz} object  use {e-s} sec (avg. {(e-s)/sz})")
-print(f"  late_init {sz} object use {e2-e} sec (avg. {(e2-e)/sz})")
+print(f"  create {sz} object 1  use {x-s} sec (avg. {(x-s)/sz})")
+print(f"  create {sz} object 2(cached)  use {e-x} sec (avg. {(e-x)/sz})")
+print(f"  late_init TypedRecord(Partial) {sz} object use {m2-e} sec (avg. {(m2-e)/sz})")
+print(f"  late_init TableRecord(Full)    {sz} object use {e2-m2} sec (avg. {(e2-m2)/sz})")
 
 #import pickle
 #with open("riscv_td.pkl", "wb") as f:

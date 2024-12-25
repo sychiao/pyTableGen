@@ -1,9 +1,9 @@
-from tablegen.Context import TableGenLoader
+from tablegen.legacy._Context import TableGenLoader
 import os
 
 def test_dump1():
-    root = os.path.dirname(__file__)
-    ctx = TableGenLoader().load(f'{root}/B.td')
+    pre, ext = os.path.splitext(__file__)
+    ctx = TableGenLoader().load(f'{pre}.td')
     with open("tmpB.td", "w") as f:
         f.write(ctx.__dump__())
 
