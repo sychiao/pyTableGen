@@ -178,20 +178,27 @@ void _InitBindingImpl::_def(pyDagInitClass &cls) {
     ;
 }
 
+void _InitBindingImpl::_def(pyVarInitClass &cls) {
+  cls.def("getName", &llvm::VarInit::getName)
+    .def("getNameInit", &llvm::VarInit::getNameInit, py::return_value_policy::reference)
+    .def("getNameInitAsString", &llvm::VarInit::getNameInitAsString)
+    .def("getAsString", &llvm::VarInit::getAsString)
+    ;
+}
+
+void _InitBindingImpl::_def(pyVarBitInitClass &cls) {
+  cls.def("getBitVar", &llvm::VarBitInit::getBitVar, py::return_value_policy::reference)
+     .def("getBitNum", &llvm::VarBitInit::getBitNum)
+     .def("getAsString", &llvm::VarBitInit::getAsString)
+    ;
+}
+
 void def_other_Init(py::module &m) {
 
     // StringInit
     py::enum_<StringInit::StringFormat>(m, "StringFormat")
       .value("SF_String", StringInit::StringFormat::SF_String)
       .value("SF_Code", StringInit::StringFormat::SF_Code)
-    ;
-
-    // VarInit
-    py::class_<VarInit, TypedInit>(m, "VarInit")
-      .def("getName", [](VarInit &Self){return Self.getName().str();})
-      .def("getNameInit", &llvm::VarInit::getNameInit)
-      .def("getNameInitAsString", &llvm::VarInit::getNameInitAsString)
-      .def("getAsString", &llvm::VarInit::getAsString)
     ;
 }
 

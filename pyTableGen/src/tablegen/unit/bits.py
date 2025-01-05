@@ -2,9 +2,23 @@ from ._base import TableGenType
 
 class Bits(TableGenType):
     Length = -1
+    __cache__ = dict()
 
-    def __init__(self, bits):
+    def __init__(self, bits = None):
         self.bits = bits
+        if bits and self.Length > 0:
+            if len(bits) != self.Length:
+                raise ValueError(f"Bits[{self.Length}] must have {self.Length} bits, not {len(bits)}")
+
+    def __class_getitem__(cls, item):
+        if isinstance(item, int):
+            if cs := Bits.__cache__.get(item):
+                return cs
+            else:
+                type_name = f'{cls.__name__}[{item}]'
+                Bits.__cache__[item] = type(type_name, (cls,), {'Length': item})
+                return Bits.__cache__[item]
+        raise TypeError(f"Bits type only accept int type for Bits[N], not {type(item)}")
 
     @classmethod
     def castfrom(cls, value)->'Bits|None':
@@ -41,31 +55,21 @@ class Bits(TableGenType):
         return self.bits[index]
 
     def __setitem__(self, index, value):
-        if isinstance(index, slice):
-            s, e = index.start, index.stop
-            if s > e:
-               self.bits = f"{self.bits[:e]}{value[::-1]}{self.bits[s+1:]}"
-            self.bits = f"{self.bits[:s]}{value}{self.bits[e+1:]}"
-        print(index, value)
+        bitsvalue = Bits.castfrom(value)
+        if bitsvalue:
+            value = bitsvalue.bits
+            if isinstance(index, slice):
+                s, e = index.start, index.stop
+                if s > e:
+                    self.bits = f"{self.bits[:e]}{value[::-1]}{self.bits[s+1:]}"
+                else:
+                    self.bits = f"{self.bits[:s]}{value}{self.bits[e+1:]}"
+            # print(index, value)
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.bits})'
 
-a = Bits('01011')
-print(isinstance(a, Bits))
-#print(isinstance(1, Bits))
-print(isinstance(a, Bits[5]))
 
-
-if a := Bits.castfrom(1902):
-  print(a.toint())
-  print(a.bits)
-  print(a[1:4])
-  print(a[4:1])
-  #a[1:4] = '1234'
-  a[4:1] = '1234'
-  print(a)
-  print(a[1:4])
 # Bits[10](0, 1, 0, 1, 0, 1, 0, 1, 0, 1)
 
 

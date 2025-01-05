@@ -39,6 +39,8 @@ using pyListInitClass    = py::class_<ListInit, TypedInit>;
 using pyStringInitClass = pybind11::class_<llvm::StringInit, llvm::TypedInit>;
 
 using pyDefInitClass     = py::class_<DefInit, TypedInit>;
+using pyVarInitClass     = py::class_<VarInit, TypedInit>;
+using pyVarBitInitClass  = py::class_<VarBitInit, TypedInit>;
 
 using pyCondOpInitClass  = py::class_<CondOpInit, TypedInit>;
 using pyOpInitClass = py::class_<OpInit, TypedInit>;
@@ -70,6 +72,8 @@ struct _InitBindingImpl {
 
   /* Var/Def */
   pyDefInitClass       pydefinitcls;
+  pyVarInitClass       pyvarinitcls;
+  pyVarBitInitClass    pyvarbitinitcls;
 
  
 
@@ -87,7 +91,10 @@ struct _InitBindingImpl {
     pydaginitcls(m, "DagInit"),
     pyopinitcls(m, "OpInit"),
     pybinopinitcls(m, "BinOpInit"),
-    pydefinitcls(m, "DefInit"){}
+    pydefinitcls(m, "DefInit"),
+    pyvarinitcls(m, "VarInit"),
+    pyvarbitinitcls(m, "VarBitInit")
+    {}
 
     void _def(pyInitKindEnum &);
     void _def(pyBinaryOpEnum &);
@@ -111,6 +118,10 @@ struct _InitBindingImpl {
 
     // Var
     void _def(pyDefInitClass &);
+    void _def(pyVarInitClass &);
+    void _def(pyVarBitInitClass &cls);
+
+
     // void _def()
     
 
@@ -129,6 +140,8 @@ struct _InitBindingImpl {
         _def(pyopinitcls);
         _def(pybinopinitcls);
         _def(pydefinitcls);
+        _def(pyvarinitcls);
+        _def(pyvarbitinitcls);
     }
 };
 

@@ -21,15 +21,22 @@ riscv_td = os.path.join(TargetDir, 'RISCV.td')
 
 Recs = binding.ParseTableGen(riscv_td, [incDir, TargetDir])
 
+from dataclasses import dataclass
+
 class ValueType(TypedRecord):
     Namespace: str
     Size: int
     Value: int
 
+
+@dataclass
 class RegisterClass(TypedRecord):
     Namespace: str
     RegTypes: list[ValueType]
     Size: int
+
+    def area(self):
+        return self.Size * len(self.RegTypes)
 
 #for rec in Recs.getAllDerivedDefinitions(RegisterClass.__name__):
 #    print(RegisterClass(rec).Size)
@@ -39,6 +46,15 @@ class RegisterClass(TypedRecord):
 import time
 a = time.time()
 Recs = binding.ParseTableGen(riscv_td, [incDir, TargetDir])
+
+rec = Recs.getClass("RegisterClass")
+print(">> rec", rec)
+for recVal in rec.getValues():
+    print(">> recVal", recVal.getName(), recVal.getType().getAsString(), recVal.getValue().getAsString(), recVal.isTemplateArg())
+
+'''
+exit()
+
 s = time.time()
 ctx = TableGenContext(Recs)
 for rec in ctx.getDefs(RegisterClass):
@@ -47,8 +63,7 @@ for rec in ctx.getDefs(RegisterClass):
 x = time.time()
 
 for rec in ctx.getDefs("RegisterClass"):
-    print(rec.Size)
-
+    rec.__late_init__()
 e = time.time()
 for rec in ctx.getDefs(RegisterClass):
     rec.__late_init__()
@@ -56,6 +71,9 @@ m2 = time.time()
 for r in ctx.getDefs("RegisterClass"):
     r.__late_init__()
 e2 = time.time()
+
+for rec in ctx.getDefs(RegisterClass):
+    print("***", rec.recname, rec.area())
 
 sz = len(list(ctx.getDefs(RegisterClass)))
 print(f"Total parse file use {s-a} sec")
@@ -67,3 +85,4 @@ print(f"  late_init TableRecord(Full)    {sz} object use {e2-m2} sec (avg. {(e2-
 #import pickle
 #with open("riscv_td.pkl", "wb") as f:
 #    pickle.dump(ctx, f)
+'''
