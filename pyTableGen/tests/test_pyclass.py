@@ -2,7 +2,6 @@ import pytest
 import tablegen.binding as binding
 import os
 
-from tablegen.unit.record import Init2Value
 
 '''
 class A<int x, string v = "NAME"> : base1, base2<v> {
@@ -33,6 +32,18 @@ class A(TableGenRecord, record=RecA):
     XZ1: int = field(init=False)
     XZ2: Bits[2] = field(init=False)
 
+    AttributeSetter({
+        "xaVal": 21,
+        "a": 1,
+        "value": Add(Getter('x'), Getter('xaVal')),
+        "B": Value(self.ctx, 'base'),
+        "rec": Bits[2],
+        "XZ": Bits[4],
+        "XZ0": 0,
+        "XZ1": 1,
+        "XZ2": Getter('rec')
+    })
+
     def __post_init__(self):
         self.xaVal = 21
         self.a = 1
@@ -45,6 +56,16 @@ class A(TableGenRecord, record=RecA):
         self.XZ2 = self.rec
 '''
 
+def Init2Expr(v: binding.Init):
+    if isinstance(v, binding.BinOpInit):
+        return f"{v.getOpcode()}({Init2Expr(v.getLHS())}, {Init2Expr(v.getRHS())})"
+    if isinstance(v, binding.VarInit):
+        return f"Value('{v.getAsString()}')"
+    if isinstance(v, binding.StringInit):
+        return f"'{v.getAsString()}'"
+    if isinstance(v, binding.IntInit):
+        return v.getValue()
+    return v.getAsString()+str(v)
 
 def test_1():
     content = '''
@@ -75,6 +96,14 @@ def xA : A<12>;'''
         f.write(content)
     Recs2 = binding.ParseTableGen(f't_testx.td')
     os.unlink('t_testx.td')
+
+    print(">>CLASS: A")
+    v = Recs2.getClass("A")
+    for recVal in v.getValues():
+        recName = '_'+recVal.getName().split(':')[1] if ':' in recVal.getName() else recVal.getName()
+        print(f'''{recName} : {recVal.getType().getAsString()} = {Init2Expr(recVal.getValue())}''')
+        print(">> recVal", recName, recVal.getType().getAsString(), Init2Expr(recVal.getValue()), recVal.isTemplateArg())
+    print("------")
 
     v = Recs2.getClass("A").getValue("value").getValue()
     print(v)

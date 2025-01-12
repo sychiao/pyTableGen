@@ -1,45 +1,33 @@
 from ..binding import IntInit, StringInit, ListInit, DefInit
 import tablegen.binding as binding
 import weakref
-from typing import ClassVar, Any
+from typing import ClassVar, Any, Protocol
 import typing
 
 from ._base import LazyProperty, TableGenType, LazyAttr
 from .bits import Bits
 from .dag import DAG
 
-def Init2Value(v: binding.Init , ctx=None):
-    if isinstance(v, binding.IntInit):
-        return v.getValue() # int
-    elif isinstance(v, binding.BitInit):
-        return v.getValue() # bool
-    elif isinstance(v, binding.BitsInit):
-        numbits = v.getNumBits()
-        bitsstr = "".join([v.getBit(idx).getAsString() for idx in range(numbits)])
-        return Bits(bitsstr)
-    elif isinstance(v, binding.StringInit):
-        return v.getAsString()
-    elif isinstance(v, binding.ListInit):
-        return [Init2Value(e, ctx) for e in v.getValues()]
-    elif isinstance(v, binding.DefInit):
-        return TableGenRecordWrapper(v.getDef())
-    elif isinstance(v, binding.DagInit):
-        return "DAG"
-    else:
-        return f"Unknonw {v.getAsString()}"
+class ContextProtocol(Protocol):
+    def getValuefromInit(self, v: binding.Init):
+        ...
 
-class TableGenContext:
-
-    def __init__(self):
-        self.records = dict()
-
-    def addRecord(self, recobj):
-        self.records[recobj.recname] = recobj
-    
-    def getRecord(self, name):
-        return self.records.get(name)
+class EmptyContext:
+    def getValuefromInit(self, v: binding.Init):
+        return None
 
 class TableGenRecord(TableGenType):
+
+    def setCtx(self, ctx):
+        self._ctx = ctx
+
+    @property
+    def Ctx(self):
+        if self._ctx:
+            return self._ctx
+        else:
+            self._ctx = EmptyContext()
+            return self._ctx
 
     def __recname__(self)->str:
         raise NotImplementedError
@@ -83,6 +71,9 @@ class TableGenRecord(TableGenType):
     def __repr__(self):
         return f"<{self.recname}: {self.bases} {self.items}>"
 
+    def safe_cast(self, cls):
+        return self
+
 class TableGenRecordWrapper(TableGenRecord):
     __cached__ = weakref.WeakValueDictionary()
 
@@ -100,7 +91,7 @@ class TableGenRecordWrapper(TableGenRecord):
 
     def __init__(self, rec: binding.Record, ctx=None):
         self._rec = rec
-        self._ctx = ctx
+        self.setCtx(ctx)
 
     @LazyAttr
     def __recname__(self):
@@ -123,15 +114,20 @@ class TableGenRecordWrapper(TableGenRecord):
         self.__late_init__()
         return {key: self.__dict__[key] for key in self.fields}
 
+    def _getValueInit(self, key: str):
+        return self._rec.getValue(key).getValue()
+
+    def _getValue(self, key: str):
+        return self.Ctx.getValuefromInit(self._getValueInit(key))
+
     def __getattr__(self, key: str):
-        Value = Init2Value(self._rec.getValue(key).getValue(), self._ctx)
-        self.__dict__[key] = Value
-        return Value
+        self.__dict__[key] = self._getValue(key)
+        return self.__dict__[key]
 
     def __late_init__(self):
         for key in self.fields:
             if key not in self.__dict__:
-                self.__dict__[key] = Init2Value(self._rec.getValue(key).getValue(), self._ctx)
+                self.__dict__[key] = self._getValue(key)
 
     def cast(self, cls):
         if isinstance(self, cls):

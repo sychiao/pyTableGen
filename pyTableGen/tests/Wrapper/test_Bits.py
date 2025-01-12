@@ -34,12 +34,12 @@ def test_1():
 
     if a := Bits.castfrom(1902):
         print(a.toint())
-    print(a.bits)
-    print(a[1:4])
-    print(a[4:1])
-    #a[1:4] = '1234'
-    a[4:1] = 'xxxx'
-    print("check 1", a)
-    print("check 2", a[1:4])
-    a[1:4] = b[0:1]
-    print(a)
+        print(a.bits)
+        print(a[1:4])
+        print(a[4:1])
+        #a[1:4] = '1234'
+        a[4:1] = 'xxxx'
+        print("check 1", a)
+        print("check 2", a[1:4])
+        a[1:4] = b[0:1]
+        print(a)
