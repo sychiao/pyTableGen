@@ -1,4 +1,5 @@
-from tablegen.unit.record import TableGenRecordWrapper, TableGenRecord
+from tablegen.unit.record import TableGenRecord
+from tablegen.RecordKeeper import TableGenRecordWrapper
 from tablegen.context import TableGenContext
 
 import tablegen.binding as binding
@@ -47,8 +48,7 @@ def xC : C;
     os.unlink('t_test.td')
 
     xBRec = Recs2.getDef('xB')
-    ctx = TableGenContext()
-    z = TableGenRecordWrapper(xBRec, ctx)
+    z = TableGenRecordWrapper(xBRec)
     print(z, isinstance(z, A), isinstance(z, X))
     print("a", z.a)
     print(z.b)
@@ -69,12 +69,12 @@ def xC : C;
     
     rr = Recs2.getDef('xC')
     s = time.time()
-    CIns = TableGenRecordWrapper(rr, ctx)
+    CIns = TableGenRecordWrapper(rr)
     e = time.time()
     print("create object wrapper need", e - s)
 
     s = time.time()
-    CIns2 = TableGenRecordWrapper(rr, ctx)
+    CIns2 = TableGenRecordWrapper(rr)
     e = time.time()
     print("create cached wrapper need", e - s)
 
