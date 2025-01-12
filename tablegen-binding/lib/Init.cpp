@@ -64,6 +64,19 @@ void _InitBindingImpl::_def(pyBinaryOpEnum &kind) {
       .value("SHL", BindBinOpInit::SHL)
       .value("SRA", BindBinOpInit::SRA)
       .value("SRL", BindBinOpInit::SRL)
+      .value("LISTCONCAT", BindBinOpInit::LISTCONCAT)
+      //.value("LISTSLICE", BindBinOpInit::LISTSLICE)
+      //.value("RANGEC", BindBinOpInit::RANGEC)
+      .value("STRCONCAT", BindBinOpInit::STRCONCAT)
+      .value("EQ", BindBinOpInit::EQ)
+      .value("NE", BindBinOpInit::NE)
+      .value("LT", BindBinOpInit::LT)
+      .value("LE", BindBinOpInit::LE)
+      .value("GT", BindBinOpInit::GT)
+      .value("GE", BindBinOpInit::GE)
+      //.value("GETDAGARG", BindBinOpInit::GETDAGARG)
+      //.value("GETDAGNAME", BindBinOpInit::GETDAGNAME)
+      //.value("GETDAGOP", BindBinOpInit::GETDAGOP)
     ;
 }
 
