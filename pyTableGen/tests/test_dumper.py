@@ -6,6 +6,7 @@ def test_dump1():
     ctx = TableGenLoader().load(f'{pre}.td')
     with open("tmpB.td", "w") as f:
         f.write(ctx.__dump__())
-
+    
     rectx= TableGenLoader().load('tmpB.td')
     assert ctx == rectx
+    os.unlink("tmpB.td")

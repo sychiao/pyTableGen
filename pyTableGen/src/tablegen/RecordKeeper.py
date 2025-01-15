@@ -14,7 +14,7 @@ class Wrapper:
 
     def __init_subclass__(cls):
         cls.__cached__ = weakref.WeakValueDictionary()
-    
+
     def __new__(cls, obj, *args, **kwargs):
         if cached := cls.__cached__.get(id(obj)):
             return cached
@@ -25,11 +25,11 @@ class Wrapper:
         return ins
 
 class TableGenRecordWrapper(Wrapper, TableGenRecord):
-    
+
     def __init__(self, rec: binding.Record):
         self._rec = rec
         self.RK = RecordKeeper(rec.getRecords())
-    
+
     @LazyAttr
     def __recname__(self):
         return self._rec.getName()
@@ -41,7 +41,7 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
     @LazyAttr
     def __base__(self):
         return tuple(record.getName() for record in self._rec.getType().getClasses())
-    
+
     @LazyAttr
     def __fields__(self):
         return {RecVal.getName() for RecVal in self._rec.getValues()}

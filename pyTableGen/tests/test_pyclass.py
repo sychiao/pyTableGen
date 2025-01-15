@@ -2,6 +2,8 @@ import pytest
 import tablegen.binding as binding
 import os
 
+from tablegen.unit.bits import Bits
+
 
 '''
 class A<int x, string v = "NAME"> : base1, base2<v> {
@@ -56,16 +58,80 @@ class A(TableGenRecord, record=RecA):
         self.XZ2 = self.rec
 '''
 
+def dumpInit(v: binding.Init):
+    if isinstance(v, binding.BinOpInit):
+        return f"{v.getOpcode()}({dumpInit(v.getLHS())}, {dumpInit(v.getRHS())})"
+    elif isinstance(v, binding.VarInit):
+        return f"self.{v.getAsString().split(':')[1]}"
+    elif isinstance(v, binding.StringInit):
+        return f"'{v.getAsString()}'"
+    elif isinstance(v, binding.IntInit):
+        return v.getValue()
+    elif isinstance(v, binding.BitsInit):
+        numbits = v.getNumBits()
+        bitsstr = ", ".join([v.getBit(idx).getAsString() for idx in range(numbits)])
+        return f"Bits[{numbits}]({bitsstr})"
+    return v.getAsString()+str(v)
+
 def Init2Expr(v: binding.Init):
     if isinstance(v, binding.BinOpInit):
         return f"{v.getOpcode()}({Init2Expr(v.getLHS())}, {Init2Expr(v.getRHS())})"
     if isinstance(v, binding.VarInit):
-        return f"Value('{v.getAsString()}')"
+        return f"self.{v.getAsString()}"
     if isinstance(v, binding.StringInit):
         return f"'{v.getAsString()}'"
     if isinstance(v, binding.IntInit):
         return v.getValue()
     return v.getAsString()+str(v)
+
+def Binding2Type(v: binding.RecTy):
+    if isinstance(v, binding.BitsRecTy):
+        print("DEBUG", v.getNumBits())
+        return Bits[v.getNumBits()]
+    elif isinstance(v, binding.StringRecTy):
+        return str
+    elif isinstance(v, binding.IntRecTy):
+        return int
+    elif isinstance(v, binding.ListRecTy):
+        return list
+    elif isinstance(v, binding.DagRecTy):
+        return dict
+    elif isinstance(v, binding.RecordRecTy):
+        pass
+    print("Warning: Binding2Type unhandle type", v)
+    return v.getAsString()
+
+from dataclasses import dataclass, field, is_dataclass, make_dataclass, fields
+import inspect
+
+class TableGenClass:
+
+    def __dump__(self):
+        args = list()
+        args_name = list()
+        if is_dataclass(self):
+            for f in fields(self):
+                if f.init:
+                    args.append(f"{getattr(self, f.name)}")
+                    args_name.append(f"{f.name}")
+            return f"{type(self).__name__}<{', '.join(args)}>  /*args: {' '.join(args_name)}*/"
+        else:
+            raise ValueError("TableGenClass must be a dataclass")
+    
+
+def Record2TableGenClass(rec: binding.Record):
+    fields = []
+    print(f'''class {rec.getName()} {{''')
+    for recVal in rec.getValues():
+        recName = recVal.getName().split(':')[1] if ':' in recVal.getName() else recVal.getName()
+        if recVal.isTemplateArg():
+            print(f'''\t {recName}(Args) = {dumpInit(recVal.getValue())};''')
+            fields.append((recName, Binding2Type(recVal.getType())))
+        else:
+            print(f'''\t {recName} = {dumpInit(recVal.getValue())};''')
+            fields.append((recName, Binding2Type(recVal.getType()), field(init=False)))
+    print("}")
+    return make_dataclass(rec.getName(), fields, bases=(TableGenClass,))
 
 def test_1():
     content = '''
@@ -99,11 +165,10 @@ def xA : A<12>;'''
 
     print(">>CLASS: A")
     v = Recs2.getClass("A")
-    for recVal in v.getValues():
-        recName = '_'+recVal.getName().split(':')[1] if ':' in recVal.getName() else recVal.getName()
-        print(f'''{recName} : {recVal.getType().getAsString()} = {Init2Expr(recVal.getValue())}''')
-        print(">> recVal", recName, recVal.getType().getAsString(), Init2Expr(recVal.getValue()), recVal.isTemplateArg())
+    RecA = Record2TableGenClass(v)
     print("------")
+    print("MAKE:", RecA, inspect.get_annotations(RecA.__init__))
+    print(RecA(2, "name").__dump__())
 
     v = Recs2.getClass("A").getValue("value").getValue()
     print(v)
