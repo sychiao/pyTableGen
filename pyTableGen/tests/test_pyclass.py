@@ -155,13 +155,16 @@ class A<int x, string v = "NAME"> : base1, base2<v> {
 }
 
 defvar yaVal = A<13>;
-
-def xA : A<12>;'''
+def xB : A<12>;
+def xA : A<12> {let rec={1,1};}'''
 
     with open("t_testx.td", 'w') as f:
         f.write(content)
     Recs2 = binding.ParseTableGen(f't_testx.td')
     os.unlink('t_testx.td')
+
+    print(Recs2.getDef("xA").getValue("XZ").getValue().getAsString())
+    print(Recs2.getDef("xB").getValue("XZ").getValue().getAsString())
 
     print(">>CLASS: A")
     v = Recs2.getClass("A")
