@@ -52,13 +52,12 @@ PYBIND11_MODULE(binding, m) {
     m.doc() = "pybind11 example plugin";
 
     /* for pybind11-stubgen we need define class first then define method*/
-
-    def_Type(m);
     _RecordBindingImpl RecordBindingImpl(m);
     _RecTyBindingImpl RecTyBinding(m);
     _InitBindingImpl InitBinding(m);
 
     /*define method*/
+    def_Type(m);
     RecordBindingImpl.def();
     RecTyBinding.def();
     InitBinding.def();

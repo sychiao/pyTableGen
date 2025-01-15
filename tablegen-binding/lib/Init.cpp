@@ -192,7 +192,7 @@ void _InitBindingImpl::_def(pyDagInitClass &cls) {
 }
 
 void _InitBindingImpl::_def(pyVarInitClass &cls) {
-  cls.def("getName", &llvm::VarInit::getName)
+  cls.def("getName", [](VarInit &Self){return Self.getName().str();})
     .def("getNameInit", &llvm::VarInit::getNameInit, py::return_value_policy::reference)
     .def("getNameInitAsString", &llvm::VarInit::getNameInitAsString)
     .def("getAsString", &llvm::VarInit::getAsString)
