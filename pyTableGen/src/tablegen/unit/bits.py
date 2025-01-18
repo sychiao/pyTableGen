@@ -1,14 +1,35 @@
 from ._base import TableGenType
+class VarBit:
+
+    def __init__(self, Owner, index):
+        self.Owner = Owner
+        self.index = index
+    
+    def value(self):
+        return self.Owner[self.index]
+
+    def __repr__(self):
+        if isinstance(self.value(), VarBit):
+            if isinstance(self.Owner, Bits):
+                return f'{self.Owner.name}[{self.index}]'
+            return f'{self.Owner}[{self.index}]'
+        else:
+            return f'{self.value()}'
 
 class Bits(TableGenType):
     Length = -1
+    bits: tuple
     __cache__ = dict()
 
     def __init__(self, bits = None):
         self.bits = bits
-        if bits and self.Length > 0:
-            if len(bits) != self.Length:
-                raise ValueError(f"Bits[{self.Length}] must have {self.Length} bits, not {len(bits)}")
+        self.name = 'bits'
+        if self.Length > 0:
+            if bits:
+                if len(bits) != self.Length:
+                    raise ValueError(f"Bits[{self.Length}] must have {self.Length} bits, not {len(bits)}")
+            else:
+                self.bits = tuple(VarBit(self, i) for i in range(self.Length))
 
     def __class_getitem__(cls, item):
         if isinstance(item, int):
@@ -25,11 +46,11 @@ class Bits(TableGenType):
         if issubclass(type(value), Bits):
             return value
         elif isinstance(value, int):
-            return Bits(bin(value)[2:])
+            return Bits(tuple(bin(value)[2:]))
         elif isinstance(value, str):
-            return cls(value)
+            return cls(tuple(value))
         elif isinstance(value, list):
-            return cls(''.join(['1' if i else '0' for i in value]))
+            return cls(tuple(['1' if i else '0' for i in value]))
         return None
 
     @classmethod
@@ -44,7 +65,7 @@ class Bits(TableGenType):
         return len(self.bits)
 
     def toint(self):
-        return int(f'{self.bits}', 2)
+        return int(''.join(self.bits), 2)
 
     def __getitem__(self, index):
         if isinstance(index, slice):
@@ -61,10 +82,11 @@ class Bits(TableGenType):
             if isinstance(index, slice):
                 s, e = index.start, index.stop
                 if s > e:
-                    self.bits = f"{self.bits[:e]}{value[::-1]}{self.bits[s+1:]}"
+                    self.bits = (*self.bits[:e], *value[::-1], *self.bits[s+1:])
                 else:
-                    self.bits = f"{self.bits[:s]}{value}{self.bits[e+1:]}"
-            # print(index, value)
+                    self.bits = (*self.bits[:s], *value, *self.bits[e+1:])
+            else:
+                self.bits = (*self.bits[:index], *value, *self.bits[index+1:])
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.bits})'

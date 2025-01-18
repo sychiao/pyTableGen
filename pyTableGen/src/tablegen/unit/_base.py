@@ -1,8 +1,10 @@
+import logging
+
 class MetaTableGenType(type):
     __types__: dict[str, type] = dict()
 
     def __instancecheck__(cls, instance, /) -> bool:
-        print('instance check', cls.__name__, cls.check(instance))
+        logging.debug('call instance check @ MetaTableGenType.__instancecheck__', cls.__name__, instance)
         return cls.check(instance)
 
     def check(cls, instance):

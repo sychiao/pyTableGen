@@ -43,3 +43,14 @@ def test_1():
         print("check 2", a[1:4])
         a[1:4] = b[0:1]
         print(a)
+
+def test_2(): # test VarBits
+    if a := Bits.castfrom(1902):
+        assert a.toint() == 1902
+        b = Bits[3]()
+        print("TEST 1", a)
+        a[1:4] = b[0:1]
+        print("TEST 2",a)
+        b[0] = 1
+        print("CHECK", b[0])
+        print("TEST 3",a)
