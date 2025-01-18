@@ -1,6 +1,6 @@
 import tablegen.binding as binding
 from tablegen.unit.record import TableGenRecord
-from tablegen.unit.bits import Bits
+from tablegen.unit.bits import Bits, VarBit
 import weakref
 
 from .utils import LazyAttr
@@ -76,9 +76,37 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
             return cls.wrap(self._rec)
         return self
 
-class RecordKeeper(Wrapper):
+class CacheDict:
+    '''
+    A CacheDict is a dictionary that provide __getf__ to get value like dict, and save result with real dict as cache.
+    '''
+
+    def __init__(self):
+        self.__cache__ = dict()
+
+    def __getf__(self, key):
+        raise NotImplementedError
+
+    def __getitem__(self, key):
+        try:
+            return self.__cache__[key]
+        except KeyError:
+            if ins := self.__getf__(key):
+                self.__cache__[key] = ins
+                return ins
+            raise 
+
+    def get(self, key, default=None):
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return default
+
+
+class RecordKeeper(CacheDict, Wrapper):
 
     def __init__(self, RK: binding.RecordKeeper):
+        super().__init__()
         self._RK = RK
 
     def getDefs(self, base=None, *clses):
@@ -101,11 +129,15 @@ class RecordKeeper(Wrapper):
                 for rec in self._RK.getAllDerivedDefinitions(clses):
                     yield self.getRecord(rec)
 
-    def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | str | int | bool | Bits | list':
+    def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | str | int | bool | Bits | VarBit | list':
         if isinstance(v, binding.IntInit):
             return v.getValue() # int
         elif isinstance(v, binding.BitInit):
             return v.getValue() # bool
+        elif isinstance(v, binding.VarBitInit):
+            idx = v.getBitNum()
+            init = v.getBitVar()
+            return VarBit(self.getValuefromInit(init), idx)
         elif isinstance(v, binding.BitsInit):
             numbits = v.getNumBits()
             bitsstr = "".join([v.getBit(idx).getAsString() for idx in range(numbits)])
@@ -122,5 +154,8 @@ class RecordKeeper(Wrapper):
             return f"Unknonw {v.getAsString()}"
         pass
 
-    def getRecord(self, name: str):
+    def __getf__(self, name: str):
         return TableGenRecordWrapper(self._RK.getDef(name))
+
+    def getRecord(self, name: str):
+        return self[name]

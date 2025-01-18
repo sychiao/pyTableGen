@@ -1,5 +1,5 @@
 from ._base import TableGenType
-class VarBit:
+class VarBit(TableGenType):
 
     def __init__(self, Owner, index):
         self.Owner = Owner

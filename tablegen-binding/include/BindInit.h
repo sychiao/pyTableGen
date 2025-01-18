@@ -30,6 +30,7 @@ using pyStringFormatEnum = py::enum_<StringInit::StringFormat>;
 
 using pyInitClass = py::class_<Init>;
 using pyTypedInitClass = py::class_<TypedInit, Init>;
+using pyUnsetInitClass = py::class_<UnsetInit, TypedInit>;
 
 using pyBitInitClass     = py::class_<BitInit, TypedInit>;
 using pyBitsInitClass    = py::class_<BitsInit, TypedInit>;
@@ -56,6 +57,8 @@ struct _InitBindingImpl {
 
   pyInitClass        pyinitcls;
   pyTypedInitClass   pytypedinitcls;
+  pyUnsetInitClass   pyunsetinitcls;
+
   /* Subclass of TypedInit*/
   pyBitInitClass       pybitinitcls;
   pyBitsInitClass      pybitsinitcls;
@@ -83,6 +86,7 @@ struct _InitBindingImpl {
     pystrenum(m, "StringFormat"),
     pyinitcls(m, "Init"),
     pytypedinitcls(m, "TypedInit"),
+    pyunsetinitcls(m, "UnsetInit"),
     pybitinitcls(m, "BitInit"),
     pybitsinitcls(m, "BitsInit"),
     pyintinitcls(m, "IntInit"),
@@ -102,6 +106,7 @@ struct _InitBindingImpl {
 
     void _def(pyInitClass &) ;
     void _def(pyTypedInitClass &);
+    void _def(pyUnsetInitClass &);
 
     // Values
     void _def(pyBitInitClass &);
@@ -131,6 +136,7 @@ struct _InitBindingImpl {
         _def(pystrenum);
         _def(pyinitcls);
         _def(pytypedinitcls);
+        _def(pyunsetinitcls);
         _def(pybitinitcls);
         _def(pybitsinitcls);
         _def(pyintinitcls);
