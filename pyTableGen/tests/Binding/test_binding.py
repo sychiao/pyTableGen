@@ -43,6 +43,7 @@ def xB : A, B;
     assert Recs4 is None
     Recs5 = tablegen.binding.ParseTableGen(f'___.td', [], ["Error"])
     assert Recs5 is None
+    os.unlink('a_test.td')
     
 
 def test_1():

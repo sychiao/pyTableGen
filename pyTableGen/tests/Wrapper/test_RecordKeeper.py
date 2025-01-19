@@ -28,10 +28,6 @@ defvar yaVal = A<13>;
 def xA : A<12>;'''
 
 def test_1():
-    with open("t_test.td", 'w') as f:
-        f.write(content)
-    Recs = RK.load(f't_test.td')
-    os.unlink('t_test.td')
-
+    Recs = RK.RecordKeeper.loads(content)
     x = Recs.getRecord("xA")
     print(x)

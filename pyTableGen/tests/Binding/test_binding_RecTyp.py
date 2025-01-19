@@ -27,6 +27,7 @@ def xB : A, B;
     with open("_test.td", 'w') as f:
         f.write(content)
     Recs2 = binding.ParseTableGen(f'_test.td')
+    os.unlink('_test.td')
     x = Recs2.getClass('A').getValue('a').getValue()
     w = Recs2.getClass('A').getValue('b').getValue()
 

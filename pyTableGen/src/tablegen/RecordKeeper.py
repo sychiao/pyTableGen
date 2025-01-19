@@ -4,10 +4,20 @@ from tablegen.unit.bits import Bits, VarBit
 import weakref
 
 from .utils import LazyAttr
+from random import random
+import os
 
+def load(td: str, incDir: list[str] = list())->binding.RecordKeeper:
+    return binding.ParseTableGen(td, binding.StringVector(incDir))
 
-def load(td: str, incDir: list[str] = list()):
-    return RecordKeeper(binding.ParseTableGen(td, incDir))
+def loads(tds: str, incDir: list[str] = list())->binding.RecordKeeper:
+    filename = hex(hash(random()))[2:]+".td"
+    with open(filename, 'w') as f:
+        f.write(tds)
+    rec = binding.ParseTableGen(filename, binding.StringVector(incDir))
+    os.remove(filename)
+    return rec
+
 
 class Wrapper:
     __cached__ = weakref.WeakValueDictionary()
@@ -108,6 +118,14 @@ class RecordKeeper(CacheDict, Wrapper):
     def __init__(self, RK: binding.RecordKeeper):
         super().__init__()
         self._RK = RK
+
+    @classmethod
+    def load(cls, td: str, incDir: list[str] = list()):
+        return cls(load(td, incDir))
+    
+    @classmethod
+    def loads(cls, tds: str, incDir: list[str] = list()):
+        return cls(loads(tds, incDir))
 
     def getDefs(self, base=None, *clses):
         if not base:

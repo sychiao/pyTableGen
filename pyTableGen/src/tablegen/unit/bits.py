@@ -22,14 +22,14 @@ class Bits(TableGenType):
     __cache__ = dict()
 
     def __init__(self, bits = None):
-        self.bits = bits
         self.name = 'bits'
-        if self.Length > 0:
-            if bits:
+        if bits:
+            if self.Length > 0:
                 if len(bits) != self.Length:
                     raise ValueError(f"Bits[{self.Length}] must have {self.Length} bits, not {len(bits)}")
-            else:
-                self.bits = tuple(VarBit(self, i) for i in range(self.Length))
+            self.bits = bits
+        else:
+            self.bits = tuple(VarBit(self, i) for i in range(self.Length))
 
     def __class_getitem__(cls, item):
         if isinstance(item, int):
