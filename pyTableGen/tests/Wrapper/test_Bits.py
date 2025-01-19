@@ -9,7 +9,7 @@ def test_0():
     a = Bits('01011')
     assert a.toint() == 11
 
-    if a := Bits.castfrom(bin(1902)):
+    if a := Bits.castfrom(1902):
         assert a.toint() == 1902
 
     if a := Bits.castfrom([True, False, True]):
@@ -21,8 +21,8 @@ def test_0():
     a = Bits('01011')
     assert isinstance(a, Bits)
     assert isinstance(a, Bits[5])
-    assert isinstance(1, Bits)
-    assert not isinstance(1024, Bits[5])
+    assert isinstance(Bits.castfrom(1), Bits)
+    assert not isinstance(Bits.castfrom(1024), Bits[5])
 
 
 def test_1():
@@ -54,3 +54,7 @@ def test_2(): # test VarBits
         b[0] = 1
         print("CHECK", b[0])
         print("TEST 3",a)
+
+def test_3():
+    a = Bits([1, 0, 1, 1])
+    assert a.toint() == 11

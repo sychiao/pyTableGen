@@ -18,16 +18,16 @@ class TableGenContext:
 
     @overload
     def getDefs()-> Generator[TableGenRecord, None, None]: # type: ignore
-        ...
+        ... # pragma: no cover
 
     T = TypeVar('T')
     @overload
     def getDefs(self, base: type[T]) -> Generator[T, None, None]: # type: ignore
-        ...
+        ... # pragma: no cover
 
     @overload
     def getDefs(self, base: str|type, *clses: Tuple[str|type, ...]) -> Generator[TableGenRecord, None, None]:
-        ...
+        ... # pragma: no cover
 
     def getDefs(self, base=None, *clses): # type: ignore
         if self.RK:

@@ -21,8 +21,14 @@ class TableGenRecord(TableGenType):
         except:
             return None
 
+    def bind(self, name:str):
+        self.__name = name
+
     def __recname__(self)->str:
-        raise NotImplementedError
+        try:
+            return self.__name
+        except:
+            return self.__class__.__name__.lower()
 
     def __fields__(self)->set[str]:
         raise NotImplementedError

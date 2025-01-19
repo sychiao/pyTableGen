@@ -3,7 +3,7 @@ pybind11 example plugin
 """
 from __future__ import annotations
 import typing
-__all__ = ['BinOpInit', 'BinaryOp', 'BitInit', 'BitRecTy', 'BitsInit', 'BitsRecTy', 'DagInit', 'DagRecTy', 'DefInit', 'Init', 'InitKind', 'InitVector', 'IntInit', 'IntRecTy', 'ListInit', 'ListRecTy', 'OpInit', 'ParseTableGen', 'RecTy', 'RecTyKind', 'Record', 'RecordKeeper', 'RecordMap', 'RecordRecTy', 'RecordVal', 'RecordValVector', 'RecordVector', 'SMLoc', 'SMLocVector', 'SMRange', 'StringFormat', 'StringInit', 'StringInitVector', 'StringRecTy', 'StringVector', 'SuperClassVector', 'TypedInit', 'VarBitInit', 'VarInit', 'getLLVMSourceLoc']
+__all__ = ['BinOpInit', 'BinaryOp', 'BitInit', 'BitRecTy', 'BitsInit', 'BitsRecTy', 'DagInit', 'DagRecTy', 'DefInit', 'Init', 'InitKind', 'InitVector', 'IntInit', 'IntRecTy', 'ListInit', 'ListRecTy', 'OpInit', 'ParseTableGen', 'RecTy', 'RecTyKind', 'Record', 'RecordKeeper', 'RecordMap', 'RecordRecTy', 'RecordVal', 'RecordValVector', 'RecordVector', 'SMLoc', 'SMLocVector', 'SMRange', 'StringFormat', 'StringInit', 'StringInitVector', 'StringRecTy', 'StringVector', 'SuperClassVector', 'TypedInit', 'UnsetInit', 'VarBitInit', 'VarInit', 'getLLVMSourceLoc']
 class BinOpInit(OpInit):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -1329,6 +1329,12 @@ class TypedInit(Init):
     def classof(arg0: Init) -> bool:
         ...
     def getType(self) -> RecTy:
+        ...
+class UnsetInit(Init):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    def getAsString(self) -> str:
         ...
 class VarBitInit(TypedInit):
     @staticmethod

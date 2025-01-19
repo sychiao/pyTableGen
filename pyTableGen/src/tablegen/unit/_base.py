@@ -11,10 +11,25 @@ class MetaTableGenType(type):
         return super().__instancecheck__(instance)
 
 class TableGenType(metaclass=MetaTableGenType):
-    pass
+    
+    def bind(self, name:str):
+        self.__name = name
+
+    def __defname__(self)->str:
+        try:
+            return self.__name
+        except:
+            return self.__class__.__name__.lower()
+
+    @property
+    def defname(self):
+        return self.__defname__()
 
 class RecordType(TableGenType):
 
     def check(cls, instance):
         pass
+
+class Unset:
+    pass
 

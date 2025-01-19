@@ -30,7 +30,7 @@ using pyStringFormatEnum = py::enum_<StringInit::StringFormat>;
 
 using pyInitClass = py::class_<Init>;
 using pyTypedInitClass = py::class_<TypedInit, Init>;
-using pyUnsetInitClass = py::class_<UnsetInit, TypedInit>;
+using pyUnsetInitClass = py::class_<UnsetInit, Init>;
 
 using pyBitInitClass     = py::class_<BitInit, TypedInit>;
 using pyBitsInitClass    = py::class_<BitsInit, TypedInit>;

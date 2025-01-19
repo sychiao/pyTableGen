@@ -100,8 +100,7 @@ void _InitBindingImpl::_def(pyTypedInitClass &cls) {
 }
 
 void _InitBindingImpl::_def(pyUnsetInitClass &cls) {
-    cls.def_static("classof", &llvm::UnsetInit::classof)
-      .def("getAsString", &llvm::UnsetInit::getAsString)
+    cls.def("getAsString", &llvm::UnsetInit::getAsString)
     ;
 }
 

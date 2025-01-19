@@ -1,6 +1,7 @@
 import tablegen.binding as binding
 from tablegen.unit.record import TableGenRecord
-from tablegen.unit.bits import Bits, VarBit
+from tablegen.unit.bits import Bits, VarBit, Unset
+from tablegen.unit.dag import DAG
 import weakref
 
 from .utils import LazyAttr
@@ -65,7 +66,10 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return self._rec.getValue(key).getValue()
 
     def _getValue(self, key: str):
-        return self.RK.getValuefromInit(self._getValueInit(key))
+        value = self.RK.getValuefromInit(self._getValueInit(key))
+        if isinstance(value, Bits):
+            value.name = key
+        return value
 
     def __getattr__(self, key: str):
         self.__dict__[key] = self._getValue(key)
@@ -104,7 +108,7 @@ class CacheDict:
             if ins := self.__getf__(key):
                 self.__cache__[key] = ins
                 return ins
-            raise 
+            raise KeyError
 
     def get(self, key, default=None):
         try:
@@ -112,6 +116,21 @@ class CacheDict:
         except KeyError:
             return default
 
+class Variable:
+    def __init__(self, name: str):
+        self.name = name
+    
+    def __repr__(self):
+        return f"Var({self.name})"
+
+    def value(self, obj):
+        return getattr(obj, self.name)
+
+    def getName(self):
+        return self.name
+
+    def __getitem__(self, v):
+        return VarBit(self, v)
 
 class RecordKeeper(CacheDict, Wrapper):
 
@@ -157,23 +176,41 @@ class RecordKeeper(CacheDict, Wrapper):
             init = v.getBitVar()
             return VarBit(self.getValuefromInit(init), idx)
         elif isinstance(v, binding.BitsInit):
+            print("get BitsInit")
             numbits = v.getNumBits()
-            bitsstr = "".join([v.getBit(idx).getAsString() for idx in range(numbits)])
-            return Bits(bitsstr)
+            bitstuple = tuple([self.getValuefromInit(v.getBit(idx)) for idx in range(numbits)])
+            return Bits(bitstuple)
         elif isinstance(v, binding.StringInit):
-            return v.getAsString()
+            return v.getAsUnquotedString()
         elif isinstance(v, binding.ListInit):
             return [self.getValuefromInit(e) for e in v.getValues()]
+        elif isinstance(v, binding.VarInit):
+            return Variable(v.getName())
         elif isinstance(v, binding.DefInit):
-            return "Unknonw"
+            if ins := self.getRecord(v.getAsString()):
+                return ins
+            raise ValueError(f"Record {v.getAsString()} not found")
+        elif isinstance(v, binding.UnsetInit):
+            print("get Unset")
+            return Unset()
         elif isinstance(v, binding.DagInit):
-            return "DAG"
+            op = self.getValuefromInit(v.getOperator())
+            kwargs = dict()
+            for idx, (name, arg) in enumerate(zip(v.getArgNames(), v.getArgs())):
+                if name is None:
+                    kwargs[str(idx)] = self.getValuefromInit(arg)
+                else:
+                    kwargs[name.getAsUnquotedString()] = self.getValuefromInit(arg)
+            return DAG(op, **kwargs)
         else:
-            return f"Unknonw {v.getAsString()}"
+            raise ValueError(f"Unknonw {v.getAsString()} {v.getKind()}")
         pass
 
-    def __getf__(self, name: str):
-        return TableGenRecordWrapper(self._RK.getDef(name))
+    def __getf__(self, name_or_rec: str|binding.Record):
+        if isinstance(name_or_rec, str):
+            return TableGenRecordWrapper(self._RK.getDef(name_or_rec))
+        else:
+            return TableGenRecordWrapper(name_or_rec)
 
-    def getRecord(self, name: str):
+    def getRecord(self, name: str|binding.Record) -> TableGenRecord | None:
         return self[name]
