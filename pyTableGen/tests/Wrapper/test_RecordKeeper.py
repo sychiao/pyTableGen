@@ -66,3 +66,4 @@ def test_1():
     # XZ{3-2} = rec; => XZ[2:4] = rec;
     # because rec == rec{1-0} rather than rec{0-1}
     assert x.XZ[2:4] == x.rec
+    assert x.XZ[4:2] != x.rec

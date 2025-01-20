@@ -52,3 +52,8 @@ def test_1():
         case ('base', Node('a', a), b):
             assert a == 1
             assert b == 2
+    dag = DAG('base', a=1, b=2)
+    assert list(x.pat.keys()) == ['_op', 'a', 'b']
+    assert dag['a'] == x.pat['a']
+    assert 'b' in x.pat
+    assert dag['_op'] == 'base'

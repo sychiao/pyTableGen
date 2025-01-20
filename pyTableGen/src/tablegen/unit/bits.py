@@ -12,7 +12,6 @@ class VarBit(TableGenType):
     def __eq__(self, other):
         selfname = self.Owner.name
         othername = other.Owner.name
-        print("__eq__", selfname, othername)
         if selfname == othername:
             print(self.index , other.index)
             return self.index == other.index
@@ -71,7 +70,7 @@ class Bits(TableGenType):
             return cls(tuple(value))
         elif isinstance(value, list):
             return cls(tuple(['1' if i else '0' for i in value]))
-        return None
+        raise TypeError(f"Bits type only accept int, str, list or Bits type, not {type(value)}")
 
     def __len__(self):
         return len(self.bits)

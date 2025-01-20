@@ -58,3 +58,11 @@ def test_2(): # test VarBits
 def test_3():
     a = Bits([1, 0, 1, 1])
     assert a.toint() == 11
+    a == Bits([1, 0, 1, 1])
+    a != Bits([1, 0, 1, 0])
+    a == Bits("1011")
+    with pytest.raises(TypeError):
+        a = Bits.castfrom(1.0123)
+
+    with pytest.raises(ValueError):
+        a == Bits[2]("101")

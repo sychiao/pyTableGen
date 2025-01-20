@@ -28,7 +28,7 @@ class DAG(Sequence):
     def __getitem__(self, key):
         if key == '_op':
             return self.op
-        return self.nodes[str(key)]
+        return Node(str(key), self.nodes[str(key)])
     
     def __iter__(self):
         yield self.op
@@ -41,12 +41,16 @@ class DAG(Sequence):
     def keys(self):
         yield '_op'
         yield from self.nodes.keys()
+
+    def items(self):
+        for item in self.nodes.items():
+            yield Node(*item)
     
     def __len__(self) -> int:
         return len(self.nodes) + 1
 
     def __repr__(self):
-        return f'DAG({self.op.__recname__()} {", ".join([f"{v}:${k}" for k, v in self.nodes.items()])})'
+        return f'DAG({self.op.__recname__()} {", ".join(map(str, self.items()))})'
         
 
 
