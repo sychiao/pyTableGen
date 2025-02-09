@@ -14,6 +14,7 @@ class TableGenType(metaclass=MetaTableGenType):
     
     def bind(self, name:str):
         self.__name = name
+        return self
 
     def __defname__(self)->str:
         try:

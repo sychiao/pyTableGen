@@ -1,29 +1,28 @@
 import re
+from typing import overload
 from ._base import TableGenType, Unset
 class VarBit(TableGenType):
+    Owner: 'Bits'
 
     def __init__(self, Owner, index):
         self.Owner = Owner
         self.index = index
     
-    def value(self):
-        return self.Owner[self.index]
+    def value(self) -> 'str|None':
+        if isinstance(v := self.Owner[self.index], str):
+            return v
+        return None
     
     def __eq__(self, other):
-        selfname = self.Owner.name
-        othername = other.Owner.name
-        if selfname == othername:
-            print(self.index , other.index)
-            return self.index == other.index
-        return False
+        if isinstance(other, VarBit):
+            return id(self.Owner) == id(other.Owner) and self.index == other.index
+        return self.value() == other
 
     def __repr__(self):
-        if isinstance(self.value(), VarBit):
-            if isinstance(self.Owner, Bits):
-                return f'{self.Owner.defname}[{self.index}]'
-            return f'{self.Owner}[{self.index}]'
-        else:
+        if self.value():
             return f'{self.value()}'
+        else:
+            return f'{self.Owner.defname}[{self.index}]'
 
 class Bits(TableGenType):
     Length = -1
@@ -85,6 +84,12 @@ class Bits(TableGenType):
             return value.Length == cls.Length
         return False
 
+    @overload
+    def __getitem__(self, index: int)->'str|VarBit':...
+
+    @overload
+    def __getitem__(self, index: slice)->'Bits':...
+
     def __getitem__(self, index):
         if isinstance(index, slice):
             s, e = index.start, index.stop
@@ -115,10 +120,49 @@ class Bits(TableGenType):
         return f'{self.__class__.__name__}({self.bits})'
 
     def __eq__(self, other):
-        for a, b in zip(self.bits, other.bits):
-            if a != b:
-                return False
-        return True
+        return all(a == b for a, b in zip(self.bits, other.bits))
+
+    def fragments(self)->'dict[tuple[int,int], Bits]':
+        '''
+        Fragments will try to divide bits to continuous bits or varbits with same variable.
+        e.g.:
+            {0, 1, 0, rs[0], rs[1]}
+        it will divide to:
+            (0:3): Bits({0, 1, 0}), (3:5): Bits({rs[0], rs[1]})
+        '''
+        fragments = dict()
+        def saveFrag(frag, varStart, Start, End):
+            if varStart >= 0:
+                fragments[(Start, End)] = frag[varStart:varStart+(End-Start)]
+            else:
+                fragments[(Start, End)] = frag
+
+        if isinstance(self.bits[0], VarBit):
+            varStart, CurrFrag, FragStart = self.bits[0].index, self.bits[0].Owner, 0
+        else:
+            varStart, CurrFrag, FragStart = -1, Bits([self.bits[0]]), 0
+
+        for idx, bit in enumerate(self.bits[1:], start=1):
+            
+            if isinstance(bit, VarBit):
+                if bit.Owner != CurrFrag or bit.index - varStart != idx - FragStart:
+                    saveFrag(CurrFrag, varStart, FragStart, idx)
+                    varStart, CurrFrag, FragStart = bit.index, bit.Owner, idx
+            else:
+                if varStart >= 0:
+                    saveFrag(CurrFrag, varStart, FragStart, idx)
+                    varStart, CurrFrag, FragStart = -1, Bits([bit]), idx
+                else:
+                    CurrFrag.bits += (bit,)
+        
+        if CurrFrag:
+            saveFrag(CurrFrag, varStart, FragStart, len(self.bits))
+        
+        return fragments
+
+    @classmethod
+    def __class_repr__(cls):
+        return f'bits<{cls.Length}>' if cls.Length > 0 else f'bits<{len(cls.bits)}>'
 
 # Bits[10](0, 1, 0, 1, 0, 1, 0, 1, 0, 1)
 

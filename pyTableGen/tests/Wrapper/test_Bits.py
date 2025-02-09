@@ -66,3 +66,15 @@ def test_3():
 
     with pytest.raises(ValueError):
         a == Bits[2]("101")
+
+def test_4():
+    prefix = Bits('00')
+    funct5 = Bits('10111')
+    rd = Bits[8]().bind('rd')
+    rs1 = Bits[5]().bind('rs1')
+    rs2 = Bits[5]().bind('rs2')
+    funct3 = Bits('000')
+    opcode = Bits('0110011')
+    Enc = Bits([*prefix, *funct5, *rd[3:8], *rs1, *funct3, *rs2, *opcode])
+
+    print(Enc.fragments())
