@@ -10,7 +10,18 @@ class MetaTableGenType(type):
     def check(cls, instance):
         return super().__instancecheck__(instance)
 
-class TableGenType(metaclass=MetaTableGenType):
+class _TableGenType:
+    '''
+    Magic methods for TableGenType for override
+    '''
+
+    def __defname__(self)->str:
+        try:
+            return self.__name # type: ignore
+        except AttributeError:
+            return self.__class__.__name__.lower()
+
+class TableGenType(_TableGenType, metaclass=MetaTableGenType):
     
     def bind(self, name:str, ctx=None):
         self.__name = name
@@ -24,21 +35,12 @@ class TableGenType(metaclass=MetaTableGenType):
         except AttributeError:
             return None
 
-    def __defname__(self)->str:
-        try:
-            return self.__name
-        except AttributeError:
-            return self.__class__.__name__.lower()
-
     @property
     def defname(self):
         return self.__defname__()
 
-class RecordType(TableGenType):
-
-    def check(cls, instance):
-        pass
-
-class Unset:
-    pass
+class Unset(TableGenType):
+    
+    def __defname__(self):
+        return 'unset'
 

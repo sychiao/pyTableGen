@@ -19,7 +19,6 @@ def loads(tds: str, incDir: list[str] = list())->binding.RecordKeeper:
     os.remove(filename)
     return rec
 
-
 class Wrapper:
     __cached__ = weakref.WeakValueDictionary()
 
@@ -189,11 +188,11 @@ class RecordKeeper(CacheDict, Wrapper):
         else:
             raise ValueError(f"Unknonw {v.getAsString()} {v.getKind()}")
 
-    def __getf__(self, name_or_rec: str|binding.Record):
+    def __getf__(self, name_or_rec: str|binding.Record): # magic method of CacheDict
         if isinstance(name_or_rec, str):
             return TableGenRecordWrapper(self._RK.getDef(name_or_rec))
         else:
             return TableGenRecordWrapper(name_or_rec)
 
     def getRecord(self, name: str|binding.Record) -> TableGenRecord | None:
-        return self[name]
+        return self.get(name, None) # use __getitem__ of CacheDict

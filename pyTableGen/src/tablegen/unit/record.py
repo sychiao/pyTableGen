@@ -1,15 +1,13 @@
-# from ..binding import IntInit, StringInit, ListInit, DefInit
-# import tablegen.binding as binding
-# import weakref
 from typing import ClassVar, Any
 import typing
 
 from ._base import TableGenType
-#from .bits import Bits
-#from .dag import DAG
 from ..utils import LazyAttr
 
-class TableGenRecordImpl:
+class _TableGenRecord:
+    '''
+    Magic methods for TableGenRecord for override
+    '''
     def __fields__(self)->set[str]:
         raise NotImplementedError # pragma: no cover
 
@@ -22,7 +20,7 @@ class TableGenRecordImpl:
     def __item__(self)->dict[str, Any]:
         raise NotImplementedError # pragma: no cover
 
-class TableGenRecord(TableGenRecordImpl, TableGenType):
+class TableGenRecord(_TableGenRecord, TableGenType):
 
     @property
     def fields(self):
@@ -64,4 +62,3 @@ class TypedRecord(TableGenRecord):
 
     def __item__(self) -> dict[str, Any]:
         return {key: self.__dict__[key] for key in self.fields}
-
