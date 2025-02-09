@@ -12,9 +12,17 @@ class MetaTableGenType(type):
 
 class TableGenType(metaclass=MetaTableGenType):
     
-    def bind(self, name:str):
+    def bind(self, name:str, ctx=None):
         self.__name = name
+        self.__ctx = ctx
         return self
+
+    @property
+    def Ctx(self):
+        try:
+            return self.__ctx
+        except AttributeError:
+            return None
 
     def __defname__(self)->str:
         try:

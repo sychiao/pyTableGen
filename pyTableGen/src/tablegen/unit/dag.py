@@ -25,7 +25,7 @@ class DAG(Sequence):
         for idx, arg in enumerate(args):
             nodes[f'{idx}'] = arg
 
-    def __getitem__(self, key):
+    def __getitem__(self, key): # type: ignore (syntax suger)
         if key == '_op':
             return self.op
         return Node(str(key), self.nodes[str(key)])
@@ -50,7 +50,7 @@ class DAG(Sequence):
         return len(self.nodes) + 1
 
     def __repr__(self):
-        return f'DAG({self.op.__recname__()} {", ".join(map(str, self.items()))})'
+        return f'DAG({self.op.defname} {", ".join(map(str, self.items()))})'
         
 
 

@@ -4,7 +4,7 @@ from tablegen.unit.bits import Bits, VarBit, Unset
 from tablegen.unit.dag import DAG
 import weakref
 
-from .utils import LazyAttr
+from .utils import LazyAttr, CacheDict
 from random import random
 import os
 
@@ -36,13 +36,13 @@ class Wrapper:
         return ins
 
 class TableGenRecordWrapper(Wrapper, TableGenRecord):
+    __typed__ = dict()
 
     def __init__(self, rec: binding.Record):
         self._rec = rec
         self.RK = RecordKeeper(rec.getRecords())
 
-    @LazyAttr
-    def __recname__(self):
+    def __defname__(self):
         return self._rec.getName()
 
     @LazyAttr
@@ -78,41 +78,18 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
             if key not in self.__dict__:
                 self.__dict__[key] = self._getValue(key)
 
-    def cast(self, cls):
+    @classmethod
+    def getTypedWrapper(cls, typedcls):
+        if typedcls not in cls.__typed__:
+            cls.__typed__[typedcls] = \
+                type(f'{typedcls.__name__}Wrapper', 
+                       (TableGenRecordWrapper, typedcls), {})
+        return cls.__typed__[typedcls]
+
+    def cast(self, cls, default_val = None):
         if isinstance(self, cls):
-            return cls.wrap(self._rec)
-        return None
-
-    def safe_cast(self, cls) -> 'TableGenRecord':
-        if isinstance(self, cls):
-            return cls.wrap(self._rec)
-        return self
-
-class CacheDict:
-    '''
-    A CacheDict is a dictionary that provide __getf__ to get value like dict, and save result with real dict as cache.
-    '''
-
-    def __init__(self):
-        self.__cache__ = dict()
-
-    def __getf__(self, key):
-        raise NotImplementedError
-
-    def __getitem__(self, key):
-        try:
-            return self.__cache__[key]
-        except KeyError:
-            if ins := self.__getf__(key):
-                self.__cache__[key] = ins
-                return ins
-            raise KeyError
-
-    def get(self, key, default=None):
-        try:
-            return self.__getitem__(key)
-        except KeyError:
-            return default
+            return TableGenRecordWrapper.getTypedWrapper(cls)(self._rec)
+        return default_val
 
 class Variable:
     def __init__(self, name: str):
@@ -157,7 +134,7 @@ class RecordKeeper(CacheDict, Wrapper):
                 if isinstance(base, type):
                     for rec in self._RK.getAllDerivedDefinitions(base.__name__):
                         if cc := self.getRecord(rec):
-                            yield cc.safe_cast(base)
+                            yield cc.cast(base)
                         else:
                             yield None
                 else:
@@ -168,20 +145,33 @@ class RecordKeeper(CacheDict, Wrapper):
                 for rec in self._RK.getAllDerivedDefinitions(clses):
                     yield self.getRecord(rec)
 
+    def getVarBitInit(self, v: binding.VarBitInit) -> VarBit:
+        return VarBit(self.getValuefromInit(v.getBitVar()), v.getBitNum())
+
+    def getBitsInit(self, v: binding.BitsInit) -> Bits:
+        numbits = v.getNumBits()
+        bitstuple = tuple([self.getValuefromInit(v.getBit(idx)) for idx in range(numbits)])
+        return Bits(bitstuple)
+
+    def getDagInit(self, v: binding.DagInit) -> DAG:
+        op = self.getValuefromInit(v.getOperator())
+        kwargs = dict()
+        for idx, (name, arg) in enumerate(zip(v.getArgNames(), v.getArgs())):
+            if name is None:
+                kwargs[str(idx)] = self.getValuefromInit(arg)
+            else:
+                kwargs[name.getAsUnquotedString()] = self.getValuefromInit(arg)
+        return DAG(op, **kwargs)
+
     def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | str | int | bool | Bits | VarBit | Variable | Unset | DAG | list':
         if isinstance(v, binding.IntInit):
             return v.getValue() # int
         elif isinstance(v, binding.BitInit):
             return v.getValue() # bool
         elif isinstance(v, binding.VarBitInit):
-            idx = v.getBitNum()
-            init = v.getBitVar()
-            return VarBit(self.getValuefromInit(init), idx)
+            return self.getVarBitInit(v)
         elif isinstance(v, binding.BitsInit):
-            print("get BitsInit")
-            numbits = v.getNumBits()
-            bitstuple = tuple([self.getValuefromInit(v.getBit(idx)) for idx in range(numbits)])
-            return Bits(bitstuple)
+            return self.getBitsInit(v)
         elif isinstance(v, binding.StringInit):
             return v.getAsUnquotedString()
         elif isinstance(v, binding.ListInit):
@@ -193,20 +183,11 @@ class RecordKeeper(CacheDict, Wrapper):
                 return ins
             raise ValueError(f"Record {v.getAsString()} not found")
         elif isinstance(v, binding.UnsetInit):
-            print("get Unset")
             return Unset()
         elif isinstance(v, binding.DagInit):
-            op = self.getValuefromInit(v.getOperator())
-            kwargs = dict()
-            for idx, (name, arg) in enumerate(zip(v.getArgNames(), v.getArgs())):
-                if name is None:
-                    kwargs[str(idx)] = self.getValuefromInit(arg)
-                else:
-                    kwargs[name.getAsUnquotedString()] = self.getValuefromInit(arg)
-            return DAG(op, **kwargs)
+            return self.getDagInit(v)
         else:
             raise ValueError(f"Unknonw {v.getAsString()} {v.getKind()}")
-        pass
 
     def __getf__(self, name_or_rec: str|binding.Record):
         if isinstance(name_or_rec, str):

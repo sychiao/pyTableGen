@@ -9,43 +9,20 @@ from ._base import TableGenType
 #from .dag import DAG
 from ..utils import LazyAttr
 
-class TableGenRecord(TableGenType):
-
-    def setCtx(self, ctx):
-        self._ctx = ctx
-
-    @property
-    def Ctx(self):
-        try:
-            return self._ctx
-        except AttributeError:
-            return None
-
-    def bind(self, name:str):
-        self.__name = name
-        return self
-
-    def __recname__(self)->str:
-        try:
-            return self.__name
-        except AttributeError:
-            return self.__class__.__name__.lower()
-
+class TableGenRecordImpl:
     def __fields__(self)->set[str]:
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     def __base__(self)->tuple[str, ...]:
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
     
     def __classes__(self)->tuple[str, ...]:
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     def __item__(self)->dict[str, Any]:
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
-    @property
-    def recname(self):
-        return self.__recname__()
+class TableGenRecord(TableGenRecordImpl, TableGenType):
 
     @property
     def fields(self):
@@ -65,18 +42,15 @@ class TableGenRecord(TableGenType):
 
     @classmethod
     def check(cls, ins):
-        return cls.__name__ in ins.classes
+        return issubclass(ins.__class__, TableGenRecord)
 
     def __repr__(self):
-        return f"<{self.recname}: {self.bases} {self.items}>"
+        return f"<{self.defname}: {self.bases} {self.items}>"
 
-    def safe_cast(self, cls):
-        return self
+    def cast[T](self, cls: type[T]) -> T:
+        return self # type: ignore
 
 class TypedRecord(TableGenRecord):
-
-    #def __init_subclass__(cls) -> None:
-    #    cls.__wrapped__ = type(f'{cls.__name__}Wrapper', (TableGenRecordWrapper, cls), {})
 
     @LazyAttr
     def __fields__(self):
@@ -90,7 +64,4 @@ class TypedRecord(TableGenRecord):
 
     def __item__(self) -> dict[str, Any]:
         return {key: self.__dict__[key] for key in self.fields}
-    
-    #@classmethod
-    #def wrap(cls, rec):
-    #    return cls.__wrapped__(rec)
+
