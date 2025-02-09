@@ -1,4 +1,3 @@
-import re
 from typing import overload
 from ._base import TableGenType, Unset
 class VarBit(TableGenType):

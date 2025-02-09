@@ -168,7 +168,7 @@ class RecordKeeper(CacheDict, Wrapper):
                 for rec in self._RK.getAllDerivedDefinitions(clses):
                     yield self.getRecord(rec)
 
-    def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | str | int | bool | Bits | VarBit | list':
+    def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | str | int | bool | Bits | VarBit | Variable | Unset | DAG | list':
         if isinstance(v, binding.IntInit):
             return v.getValue() # int
         elif isinstance(v, binding.BitInit):

@@ -19,7 +19,7 @@ class TableGenType(metaclass=MetaTableGenType):
     def __defname__(self)->str:
         try:
             return self.__name
-        except:
+        except AttributeError:
             return self.__class__.__name__.lower()
 
     @property

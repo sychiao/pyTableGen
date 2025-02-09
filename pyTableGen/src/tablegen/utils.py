@@ -2,7 +2,7 @@ def LazyAttr(f):
     def Attrf(self):
         try:
             return getattr(self, f'__{f.__name__}')
-        except:
+        except AttributeError:
             setattr(self, f'__{f.__name__}', f(self))
             return getattr(self, f'__{f.__name__}')
     return Attrf

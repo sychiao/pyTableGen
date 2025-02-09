@@ -1,12 +1,12 @@
-from ..binding import IntInit, StringInit, ListInit, DefInit
-import tablegen.binding as binding
-import weakref
-from typing import ClassVar, Any, Protocol
+# from ..binding import IntInit, StringInit, ListInit, DefInit
+# import tablegen.binding as binding
+# import weakref
+from typing import ClassVar, Any
 import typing
 
 from ._base import TableGenType
-from .bits import Bits
-from .dag import DAG
+#from .bits import Bits
+#from .dag import DAG
 from ..utils import LazyAttr
 
 class TableGenRecord(TableGenType):
@@ -18,16 +18,17 @@ class TableGenRecord(TableGenType):
     def Ctx(self):
         try:
             return self._ctx
-        except:
+        except AttributeError:
             return None
 
     def bind(self, name:str):
         self.__name = name
+        return self
 
     def __recname__(self)->str:
         try:
             return self.__name
-        except:
+        except AttributeError:
             return self.__class__.__name__.lower()
 
     def __fields__(self)->set[str]:

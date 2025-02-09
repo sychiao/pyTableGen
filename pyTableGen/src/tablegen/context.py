@@ -1,9 +1,6 @@
 import tablegen.binding as binding
 from typing import overload, TypeVar, Generator, Tuple
 
-from .unit.bits import Bits
-from typing import TYPE_CHECKING
-
 from .unit.record import TableGenRecord
 from .RecordKeeper import RecordKeeper
 
