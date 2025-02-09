@@ -15,8 +15,11 @@ class VarBit(TableGenType):
     
     def __eq__(self, other):
         if isinstance(other, VarBit):
-            return id(self.Owner) == id(other.Owner) and self.index == other.index
+            return self.Owner.defname == other.Owner.defname and self.index == other.index
         return self.value() == other
+
+    def __hash__(self) -> int:
+        return hash((id(self.Owner), self.index))
 
     def __repr__(self):
         if self.value():
@@ -120,7 +123,16 @@ class Bits(TableGenType):
         return f'{self.__class__.__name__}({self.bits})'
 
     def __eq__(self, other):
+        for a, b in zip(self.bits, other.bits):
+            if isinstance(a, VarBit) and isinstance(b, VarBit):
+                print("check", type(a), a, a.Owner, type(b), b.Owner, b)
         return all(a == b for a, b in zip(self.bits, other.bits))
+
+    def __hash__(self) -> int:
+        return hash(self.bits)
+
+    def variables(self)->'set[Bits]':
+        return {bit.Owner for bit in self.bits if isinstance(bit, VarBit)}
 
     def fragments(self)->'dict[tuple[int,int], Bits]':
         '''

@@ -67,9 +67,7 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
 
     def _getValue(self, key: str):
         value = self.RK.getValuefromInit(self._getValueInit(key))
-        if isinstance(value, Bits):
-            value.name = key
-        return value
+        return value.bind(key) if isinstance(value, Bits) else value
 
     def __getattr__(self, key: str):
         self.__dict__[key] = self._getValue(key)
@@ -127,6 +125,10 @@ class Variable:
         return getattr(obj, self.name)
 
     def getName(self):
+        return self.name
+
+    @property
+    def defname(self):
         return self.name
 
     def __getitem__(self, v):
