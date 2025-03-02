@@ -2,6 +2,12 @@ import tablegen.dumper as dumper
 from tablegen.unit.bits import Bits
 import re
 
+from tablegen.unit.record import TypedRecord, TableGenRecord
+from tablegen.unit.bits import Bits
+from dataclasses import dataclass, field
+from tablegen.dumper import dumpTblRecord
+
+
 class TextMatch:
 
     def __init__(self, pattern, *predicate):
@@ -37,3 +43,18 @@ def test_dumpTblDecl():
 def test_def():
     Bits.b = Bits[5]('01011')
     print(dumper.dumpTblDef(Bits.b))
+
+@dataclass
+class A(TypedRecord):
+    x: int
+    y: int
+
+    def __post_init__(self):
+        self.v = self.x + self.y
+
+def test_Record():
+    print(issubclass(A, TypedRecord))
+    A.a = A(1, 2).let("a", 3)
+    A.a.let("b", Bits[5]()).let("c", Bits[5]('01011')).let("d", A.a.b)
+    print(A.a)
+    print(">", dumper.dumpTblDef(A.a))

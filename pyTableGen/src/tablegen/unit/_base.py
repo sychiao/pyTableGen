@@ -3,9 +3,9 @@ import logging
 class MetaTableGenType(type):
     __types__: dict[str, type] = dict()
 
-    def __init__(self, name, bases, namespace, **kwargs):
+    def __init__(cls, name, bases, namespace, **kwargs):
         super().__init__(name, bases, namespace)
-        self.named_values = dict()
+        cls.named_values = dict()
 
     def __instancecheck__(cls, instance, /) -> bool:
         logging.debug('call instance check @ MetaTableGenType.__instancecheck__', cls.__name__, instance)

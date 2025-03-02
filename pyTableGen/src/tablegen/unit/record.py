@@ -1,7 +1,8 @@
+from dataclasses import dataclass, is_dataclass
 from typing import ClassVar, Any
 import typing
 
-from ._base import TableGenType
+from ._base import TableGenType, MetaTableGenType
 from ..utils import LazyAttr
 
 class _TableGenRecord:
@@ -17,7 +18,7 @@ class _TableGenRecord:
     def __classes__(self)->tuple[str, ...]:
         raise NotImplementedError # pragma: no cover
 
-    def __item__(self)->dict[str, Any]:
+    def __items__(self)->dict[str, Any]:
         raise NotImplementedError # pragma: no cover
 
 class TableGenRecord(_TableGenRecord, TableGenType):
@@ -36,7 +37,7 @@ class TableGenRecord(_TableGenRecord, TableGenType):
 
     @property
     def items(self):
-        return self.__item__()
+        return self.__items__()
 
     @classmethod
     def check(cls, ins):
@@ -48,10 +49,12 @@ class TableGenRecord(_TableGenRecord, TableGenType):
     def cast[T](self, cls: type[T]) -> T:
         return self # type: ignore
 
+import inspect
 class TypedRecord(TableGenRecord):
 
     @LazyAttr
     def __fields__(self):
+        # ClassVar is not a field
         return {key for key, ty in type(self).__annotations__.items() if typing.get_origin(ty) != ClassVar}
 
     def __classes__(self) -> tuple[str, ...]:
@@ -60,5 +63,26 @@ class TypedRecord(TableGenRecord):
     def __base__(self) -> tuple[str, ...]:
         return (type(self).__name__, )
 
-    def __item__(self) -> dict[str, Any]:
+    def __items__(self) -> dict[str, Any]:
         return {key: self.__dict__[key] for key in self.fields}
+
+    def __setattr__(self, name: str, value: Any, /) -> None:
+        print("TypedRecord SetAttr", name, value)
+        if isinstance(value, TableGenType):
+            value.bind(name, self)
+        return super().__setattr__(name, value)
+
+    def args(self):
+        s = inspect.get_annotations(self.getType().__init__)
+        return [(key, ty) for key, ty in s.items() if key in self.fields]
+
+    def additional_fields(self) -> dict[str, tuple[Any, type]]:
+        # fields is lazy attribute so it must be called first before iterate __dict__
+        fields = self.fields 
+        return {k: (self.__dict__[k], v.getType() if issubclass(type(v), TableGenType) else type(v))
+                    for k, v in self.__dict__.items() if not k.startswith("_") and k not in fields}
+    
+    def let(self, key, value):
+        setattr(self, key, value)
+        return self
+
