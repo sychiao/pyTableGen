@@ -20,29 +20,37 @@ class VarBit(TableGenType):
     def __hash__(self) -> int:
         return hash((id(self.Owner), self.index))
 
+    def __dump__(self):
+        return f'{self.Owner.defname}[{self.index}]'
+
     def __repr__(self):
         if self.value():
             return f'{self.value()}'
         else:
-            return f'{self.Owner.defname}[{self.index}]'
+            return f'{self.Owner.defname}[{self.index}]'        
 
 class Bits(TableGenType):
     Length = -1
     bits: tuple
     __cache__ = dict()
 
+    @staticmethod
+    def toBit(bit):
+        if isinstance(bit, VarBit):
+            return bit
+        elif not bit or bit == '0':
+            return '0'
+        else:
+            return '1'
+
     def __init__(self, bits = None):
         if bits:
-            def toBit(bit, idx):
-                if isinstance(bit, VarBit):
-                    return bit
-                elif not bit or bit == '0':
-                    return '0'
-                elif isinstance(bit, Unset):
+            def toBitInit(bit, idx):
+                if isinstance(bit, Unset):
                     return VarBit(self, idx)
-                else:
-                    return '1'
-            self.bits = tuple([toBit(bit, idx) for idx, bit in enumerate(bits)])
+                return self.toBit(bit) 
+            self.bits = \
+                tuple([toBitInit(bit, idx) for idx, bit in enumerate(bits)])
             if self.Length > 0:
                 if len(self.bits) != self.Length:
                     raise ValueError(f"Bits[{self.Length}] must have {self.Length} bits, not {len(bits)}")
@@ -81,7 +89,6 @@ class Bits(TableGenType):
 
     @classmethod
     def check(cls, value):
-        print("*", value.__class__, issubclass(value.__class__, Bits))
         if issubclass(value.__class__, Bits):
             return value.Length == cls.Length
         return False
@@ -97,7 +104,6 @@ class Bits(TableGenType):
             s, e = index.start, index.stop
             s = s if s else 0
             e = e if e else len(self.bits)
-            print("get", s, "to", e, self.bits[s:e])
             if s > e:
                 return Bits(self.bits[s:e-1:-1])
             return Bits(self.bits[s:e])
@@ -122,9 +128,6 @@ class Bits(TableGenType):
         return f'{self.__class__.__name__}({self.bits})'
 
     def __eq__(self, other):
-        for a, b in zip(self.bits, other.bits):
-            if isinstance(a, VarBit) and isinstance(b, VarBit):
-                print("check", type(a), a, a.Owner, type(b), b.Owner, b)
         return all(a == b for a, b in zip(self.bits, other.bits))
 
     def __hash__(self) -> int:
@@ -172,8 +175,59 @@ class Bits(TableGenType):
         return fragments
 
     @classmethod
-    def __class_repr__(cls):
+    def __class_dump__(cls):
         return f'bits<{cls.Length}>' if cls.Length > 0 else f'bits<{len(cls.bits)}>'
+
+    def __dump__(self):
+        def bit2str(bit):
+            if isinstance(bit, VarBit):
+                return bit.__dump__()
+            return bit
+        return ''.join(bit2str(bit) for bit in self.bits)
+
+    def getType(self):
+        if (t:= type(self)) != Bits:
+            return t
+        return Bits[len(self.bits)]
+
+    def isDef(self):
+        for bit in self.bits:
+            if isinstance(bit, VarBit):
+                if bit.Owner is self:
+                    return False
+        return True
+
+    def __iscomplex__(self):
+        return len(self.fragments()) > 1
+
+    def isVar(self):
+        # Check if all bits are VarBits and they are from the same variable
+        if not self.bits:
+            return False
+
+        first_owner = None
+        for bit in self.bits:
+            if not isinstance(bit, VarBit):
+                return False
+            if first_owner is None:
+                first_owner = bit.Owner
+            elif bit.Owner != first_owner:
+                return False
+        return True
+    
+    def isConstant(self):
+        return all(isinstance(bit, str) for bit in self.bits)
+
+    def concat(self, other):
+        return Bits(self.bits + other.bits)
+
+    def __matmul__(self, other):
+        # @ is used for concatenation bits
+        return self.concat(other)
+
+    def __add__(self, other):
+        # + is used for add bits
+        return Bits(hex(self.toint() + other.toint())[2:])
 
 # Bits[10](0, 1, 0, 1, 0, 1, 0, 1, 0, 1)
 

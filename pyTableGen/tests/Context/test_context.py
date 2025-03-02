@@ -81,7 +81,7 @@ def test_2():
     Recs = RK.RecordKeeper.loads(content)
     ctx = TableGenContext(Recs)
     if x := ctx.getRecord("xA"):
-        assert x.Ctx == ctx
+        assert x.parent == ctx
         assert x.a == 1
 
     if rk := ctx.getRecordKeeper():

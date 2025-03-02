@@ -38,11 +38,9 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
     __typed__ = dict()
 
     def __init__(self, rec: binding.Record):
+        self.__name = rec.getName()
         self._rec = rec
         self.RK = RecordKeeper(rec.getRecords())
-
-    def __defname__(self):
-        return self._rec.getName()
 
     @LazyAttr
     def __classes__(self):
