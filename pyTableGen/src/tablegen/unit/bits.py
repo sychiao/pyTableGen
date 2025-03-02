@@ -21,7 +21,7 @@ class VarBit(TableGenType):
         return hash((id(self.Owner), self.index))
 
     def __dump__(self):
-        return f'{self.Owner.defname}[{self.index}]'
+        return f'{self.Owner.defname}{{{self.index}}}'
 
     def __repr__(self):
         if self.value():
@@ -183,7 +183,7 @@ class Bits(TableGenType):
             if isinstance(bit, VarBit):
                 return bit.__dump__()
             return bit
-        return ''.join(bit2str(bit) for bit in self.bits)
+        return '{' + ', '.join(bit2str(bit) for bit in self.bits) + '}'
 
     def getType(self):
         if (t:= type(self)) != Bits:

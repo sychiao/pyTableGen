@@ -22,7 +22,7 @@ class MetaTableGenType(type):
         if isinstance(type(value), MetaTableGenType):
             if not isinstance(value, self):
                 logging.warning(f"Assign {self.__name__}.{name} with {type(value).__name__} value is unexpect")
-            if not value.isDef():
+            if not value.hasName():
                 value.bind(name, self)
         return super().__setattr__(name, value)
 
@@ -62,7 +62,7 @@ class TableGenType(_TableGenType, metaclass=MetaTableGenType):
     def isComplex(self):
         return self.__iscomplex__()
 
-    def isDef(self):
+    def hasName(self):
         return self._hasName
 
     def getType(self):
