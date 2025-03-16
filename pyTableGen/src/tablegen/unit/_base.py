@@ -45,9 +45,10 @@ class _TableGenType:
 
 class TableGenType(_TableGenType, metaclass=MetaTableGenType):
     _hasName = False
+    __recname__: str
     
     def bind(self, name:str, parent=None):
-        self.__name = name
+        self.__recname__ = name
         self.__parent = parent
         self._hasName = True
         return self
@@ -77,12 +78,22 @@ class TableGenType(_TableGenType, metaclass=MetaTableGenType):
     @property
     def defname(self):
         try:
-            return self.__name # type: ignore
+            return self.__recname__ # type: ignore
         except AttributeError:
             return self.__class__.__name__.lower()
 
 class Unset(TableGenType):
+
+    def __new__(cls):
+        try:
+            return cls.__instance
+        except AttributeError:
+            cls.__instance = super().__new__(cls)
+            return cls.__instance
     
     def __defname__(self):
         return 'unset'
+
+    def __repr__(self) -> str:
+        return '??'
 

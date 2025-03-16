@@ -58,3 +58,4 @@ def test_Record():
     A.a.let("b", Bits[5]()).let("c", Bits[5]('01011')).let("d", A.a.b)
     print(A.a)
     print(">", dumper.dumpTblDef(A.a))
+

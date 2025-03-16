@@ -10,16 +10,16 @@ class _TableGenRecord:
     Magic methods for TableGenRecord for override
     '''
     def __fields__(self)->set[str]:
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError(f"{type(self)} __fields__ is not NotImplemented") # pragma: no cover
 
     def __base__(self)->tuple[str, ...]:
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError(f"{type(self)} __base__ is not NotImplemented") # pragma: no cover
     
     def __classes__(self)->tuple[str, ...]:
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError(f"{type(self)} __classes__ is not NotImplemented") # pragma: no cover
 
     def __items__(self)->dict[str, Any]:
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError(f"{type(self)} __items__ is not NotImplemented") # pragma: no cover
 
 class TableGenRecord(_TableGenRecord, TableGenType):
 
@@ -50,6 +50,15 @@ class TableGenRecord(_TableGenRecord, TableGenType):
         return self # type: ignore
 
 import inspect
+
+class RecordDumpable:
+
+    def args(self):
+        raise NotImplementedError
+
+    def additional_fields(self):
+        raise NotImplementedError
+
 class TypedRecord(TableGenRecord):
 
     @LazyAttr

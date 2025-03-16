@@ -1,7 +1,9 @@
 from collections.abc import Sequence
+from tablegen.unit.record import TableGenRecord
 
 class Node:
     __match_args__ = ('name', 'value')
+    value: TableGenRecord
 
     def __init__(self, name=None, value=None):
         assert value is not None or name is not None
@@ -18,6 +20,8 @@ class Node:
 
 class DAG(Sequence):
     __match_args__ = ('op', 'nodes')
+    op: TableGenRecord
+    nodes: dict[str, Node]
 
     def __init__(self, op, *args, **nodes):
         self.op = op

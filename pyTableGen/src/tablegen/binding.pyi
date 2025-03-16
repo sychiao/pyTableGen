@@ -2,8 +2,10 @@
 pybind11 example plugin
 """
 from __future__ import annotations
+from collections.abc import Sequence
 import typing
 __all__ = ['BinOpInit', 'BinaryOp', 'BitInit', 'BitRecTy', 'BitsInit', 'BitsRecTy', 'DagInit', 'DagRecTy', 'DefInit', 'Init', 'InitKind', 'InitVector', 'IntInit', 'IntRecTy', 'ListInit', 'ListRecTy', 'OpInit', 'ParseTableGen', 'RecTy', 'RecTyKind', 'Record', 'RecordKeeper', 'RecordMap', 'RecordRecTy', 'RecordVal', 'RecordValVector', 'RecordVector', 'SMLoc', 'SMLocVector', 'SMRange', 'StringFormat', 'StringInit', 'StringInitVector', 'StringRecTy', 'StringVector', 'SuperClassVector', 'TypedInit', 'UnsetInit', 'VarBitInit', 'VarInit', 'getLLVMSourceLoc']
+
 class BinOpInit(OpInit):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -1138,7 +1140,7 @@ class StringRecTy(RecTy):
         ...
     def typeIsConvertibleTo(self, arg0: RecTy) -> bool:
         ...
-class StringVector:
+class StringVector(Sequence[str]):
     __hash__: typing.ClassVar[None] = None
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):

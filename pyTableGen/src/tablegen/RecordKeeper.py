@@ -1,3 +1,4 @@
+from typing import Iterable
 import tablegen.binding as binding
 from tablegen.unit.record import TableGenRecord
 from tablegen.unit.bits import Bits, VarBit, Unset
@@ -38,7 +39,7 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
     __typed__ = dict()
 
     def __init__(self, rec: binding.Record):
-        self.__name = rec.getName()
+        self.__recname__ = rec.getName()
         self._rec = rec
         self.RK = RecordKeeper(rec.getRecords())
 
@@ -55,7 +56,7 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return {RecVal.getName() for RecVal in self._rec.getValues()}
 
     @LazyAttr
-    def __item__(self):
+    def __items__(self):
         self.__late_init__()
         return {key: self.__dict__[key] for key in self.fields}
 
@@ -87,6 +88,20 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         if isinstance(self, cls):
             return TableGenRecordWrapper.getTypedWrapper(cls)(self._rec)
         return default_val
+
+class TableGenClassWrapper(TableGenRecordWrapper):
+    
+    def args(self):
+        args = dict()
+        for init in self._rec.getTemplateArgs():
+            name = init.getAsUnquotedString()
+            args[name] = self.RK.getValuefromRecTy(self._rec.getValue(name).getType())
+        return args
+
+    def __call__(self, *args):
+        obj = TableGenRecord()
+
+# TableGenRecord
 
 class Variable:
     def __init__(self, name: str):
@@ -122,25 +137,48 @@ class RecordKeeper(CacheDict, Wrapper):
     def loads(cls, tds: str, incDir: list[str] = list()):
         return cls(loads(tds, incDir))
 
-    def getDefs(self, base=None, *clses):
-        if not base:
-            for rec in self._RK.getDefs():
-                yield self.getRecord(rec)
-        else:
-            if not clses:
-                if isinstance(base, type):
-                    for rec in self._RK.getAllDerivedDefinitions(base.__name__):
-                        if cc := self.getRecord(rec):
-                            yield cc.cast(base)
-                        else:
-                            yield None
-                else:
-                    for rec in self._RK.getAllDerivedDefinitions(base):
-                        yield self.getRecord(rec)
+    def _getDefs(self, recs: Iterable[binding.Record]) :
+        for rec in recs:
+            if r :=  self.getRecord(rec):
+                yield r
             else:
-                clses = [reccls if isinstance(reccls, str) else reccls.__name__ for reccls in (base, *clses)]
-                for rec in self._RK.getAllDerivedDefinitions(clses):
-                    yield self.getRecord(rec)
+                raise ValueError(f"Record {rec.getName()} not found")
+
+    def getDefs(self, base: str | type[TableGenRecord] | None = None, *clses) -> Iterable[TableGenRecord]:
+        try:
+            if not base:
+                yield from self._getDefs(self._RK.getRecords())
+            else:
+                if not clses:
+                    if isinstance(base, type):
+                        for r in self._getDefs(self._RK.getAllDerivedDefinitions(base.__name__)):
+                            yield r.cast(base)
+                    else:
+                        yield from self._getDefs(self._RK.getAllDerivedDefinitions(base))
+                else:
+                    clses = [reccls if isinstance(reccls, str) else reccls.__name__ for reccls in (base, *clses)]
+                    yield from self._getDefs(self._RK.getAllDerivedDefinitions(clses))
+        except ValueError as e:
+            raise e
+
+    def getValuefromRecTy(self, t: binding.RecTy) -> 'TableGenClassWrapper | type[str] | type[int] | type[bool] | type[Bits] | type[VarBit] | type[Variable] | type[Unset] | type[DAG] | type[list]':
+        if isinstance(t, binding.BitRecTy):
+            return bool
+        elif isinstance(t, binding.IntRecTy):
+            return int
+        elif isinstance(t, binding.StringRecTy):
+            return str
+        elif isinstance(t, binding.ListRecTy):
+            return list
+        elif isinstance(t, binding.DagRecTy):
+            return DAG
+        elif isinstance(t, binding.BitsRecTy):
+            return Bits
+        elif isinstance(t, binding.RecordRecTy):
+            record = t.getClasses()[0]
+            return TableGenClassWrapper(record)
+        else:
+            raise ValueError(f"Unknonw {t.getAsString()} {t.getKind()}")
 
     def getVarBitInit(self, v: binding.VarBitInit) -> VarBit:
         return VarBit(self.getValuefromInit(v.getBitVar()), v.getBitNum())
@@ -186,11 +224,20 @@ class RecordKeeper(CacheDict, Wrapper):
         else:
             raise ValueError(f"Unknonw {v.getAsString()} {v.getKind()}")
 
+    def getClass(self, name: str) -> TableGenRecord | None:
+        return TableGenClassWrapper(self._RK.getClass(name))
+
     def __getf__(self, name_or_rec: str|binding.Record): # magic method of CacheDict
         if isinstance(name_or_rec, str):
-            return TableGenRecordWrapper(self._RK.getDef(name_or_rec))
+            if rec := self._RK.getDef(name_or_rec):
+                return TableGenRecordWrapper(rec)
+            else:
+                return None
         else:
             return TableGenRecordWrapper(name_or_rec)
 
     def getRecord(self, name: str|binding.Record) -> TableGenRecord | None:
         return self.get(name, None) # use __getitem__ of CacheDict
+
+    def __getattr__(self, name: str):
+        return self.getRecord(name)
