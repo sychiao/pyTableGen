@@ -2,7 +2,7 @@ from typing import ClassVar, Any, Self
 import typing
 import inspect
 
-from ._base import TableGenType
+from ._base import TableGenType, Unset
 from .bits import Bits
 from ..utils import LazyAttr
 
@@ -83,6 +83,9 @@ class TableGenRecord(_TableGenRecord, TableGenType):
         setattr(self, key, value)
         return self
     
+    def decl(self, name, type):
+        pass
+    
     def __or__(self, other):
         return UnionRecord(self, other)
 
@@ -128,6 +131,12 @@ class TableGenDummyRecord(TableGenRecord):
             for name, (value, ty) in self.additional_fields().items():
                 ret += f"\n    {ty.__class_dump__()} {name};"
             for name, (value, _) in self.additional_fields().items():
+                if isinstance(value, Bits) and name == value.defname:
+                    # skip the value if it's a bits without init value
+                    continue
+                elif isinstance(value, Unset):
+                    # skip the value if it's a unset value
+                    continue
                 ret += f"\n    let {name} = {value.__dump__()};"
             for name, value in self.let_fields().items():
                 ret += f"\n    let {name} = {value.__dump__()};"

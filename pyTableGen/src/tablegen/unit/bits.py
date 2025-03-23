@@ -90,7 +90,9 @@ class Bits(TableGenType):
     @classmethod
     def check(cls, value):
         if issubclass(value.__class__, Bits):
-            return value.Length == cls.Length
+            if cls.Length > 0:
+                return value.Length == cls.Length
+            return True
         return False
 
     @overload

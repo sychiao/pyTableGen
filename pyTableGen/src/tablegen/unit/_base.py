@@ -93,13 +93,20 @@ class TableGenType(_TableGenType, metaclass=MetaTableGenType):
             return self.__class__.__name__.lower()
 
 class Unset(TableGenType):
-
-    def __new__(cls):
+    __instance = dict()
+    
+    def __new__(cls, t):
         try:
-            return cls.__instance
-        except AttributeError:
-            cls.__instance = super().__new__(cls)
-            return cls.__instance
+            return cls.__instance[t]
+        except KeyError:
+            cls.__instance[t] = super().__new__(cls)
+            return cls.__instance[t]
+    
+    def __init__(self, type):
+        self.__type = type
+
+    def __type__(self): # type: ignore
+        return self.__type
     
     def __defname__(self):
         return 'unset'
