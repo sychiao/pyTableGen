@@ -3,11 +3,12 @@ import tablegen.binding as binding
 from tablegen.unit.record import TableGenRecord
 from tablegen.unit.bits import Bits, VarBit, Unset
 from tablegen.unit.dag import DAG
-import weakref
-
-from .utils import LazyAttr, CacheDict
+from tablegen.wrapper.wrapper import Wrapper
+from ..utils import CacheDict
 from random import random
 import os
+
+from .record import TableGenClassWrapper, TableGenRecordWrapper
 
 def load(td: str, incDir: list[str] = list())->binding.RecordKeeper:
     return binding.ParseTableGen(td, binding.StringVector(incDir))
@@ -19,89 +20,6 @@ def loads(tds: str, incDir: list[str] = list())->binding.RecordKeeper:
     rec = binding.ParseTableGen(filename, binding.StringVector(incDir))
     os.remove(filename)
     return rec
-
-class Wrapper:
-    __cached__ = weakref.WeakValueDictionary()
-
-    def __init_subclass__(cls):
-        cls.__cached__ = weakref.WeakValueDictionary()
-
-    def __new__(cls, obj, *args, **kwargs):
-        if cached := cls.__cached__.get(id(obj)):
-            return cached
-        if issubclass(obj.__class__, TableGenRecord):
-            return obj
-        ins = super().__new__(cls)
-        cls.__cached__[id(obj)] = ins
-        return ins
-
-class TableGenRecordWrapper(Wrapper, TableGenRecord):
-    __typed__ = dict()
-
-    def __init__(self, rec: binding.Record):
-        self.__recname__ = rec.getName()
-        self._rec = rec
-        self.RK = RecordKeeper(rec.getRecords())
-
-    @LazyAttr
-    def __classes__(self):
-        return tuple(record.getName() for record, _ in self._rec.getSuperClasses())
-
-    @LazyAttr
-    def __base__(self):
-        return tuple(record.getName() for record in self._rec.getType().getClasses())
-
-    @LazyAttr
-    def __fields__(self):
-        return {RecVal.getName() for RecVal in self._rec.getValues()}
-
-    @LazyAttr
-    def __items__(self):
-        self.__late_init__()
-        return {key: self.__dict__[key] for key in self.fields}
-
-    def _getValueInit(self, key: str):
-        return self._rec.getValue(key).getValue()
-
-    def _getValue(self, key: str):
-        value = self.RK.getValuefromInit(self._getValueInit(key))
-        return value.bind(key) if isinstance(value, Bits) else value
-
-    def __getattr__(self, key: str):
-        self.__dict__[key] = self._getValue(key)
-        return self.__dict__[key]
-
-    def __late_init__(self):
-        for key in self.fields:
-            if key not in self.__dict__:
-                self.__dict__[key] = self._getValue(key)
-
-    @classmethod
-    def getTypedWrapper(cls, typedcls):
-        if typedcls not in cls.__typed__:
-            cls.__typed__[typedcls] = \
-                type(f'{typedcls.__name__}Wrapper', 
-                       (TableGenRecordWrapper, typedcls), {})
-        return cls.__typed__[typedcls]
-
-    def cast(self, cls, default_val = None):
-        if isinstance(self, cls):
-            return TableGenRecordWrapper.getTypedWrapper(cls)(self._rec)
-        return default_val
-
-class TableGenClassWrapper(TableGenRecordWrapper):
-    
-    def args(self):
-        args = dict()
-        for init in self._rec.getTemplateArgs():
-            name = init.getAsUnquotedString()
-            args[name] = self.RK.getValuefromRecTy(self._rec.getValue(name).getType())
-        return args
-
-    def __call__(self, *args):
-        obj = TableGenRecord()
-
-# TableGenRecord
 
 class Variable:
     def __init__(self, name: str):
@@ -176,7 +94,7 @@ class RecordKeeper(CacheDict, Wrapper):
             return Bits
         elif isinstance(t, binding.RecordRecTy):
             record = t.getClasses()[0]
-            return TableGenClassWrapper(record)
+            return TableGenClassWrapper(record, self)
         else:
             raise ValueError(f"Unknonw {t.getAsString()} {t.getKind()}")
 
@@ -225,16 +143,16 @@ class RecordKeeper(CacheDict, Wrapper):
             raise ValueError(f"Unknonw {v.getAsString()} {v.getKind()}")
 
     def getClass(self, name: str) -> TableGenRecord | None:
-        return TableGenClassWrapper(self._RK.getClass(name))
+        return TableGenClassWrapper(self._RK.getClass(name), self)
 
     def __getf__(self, name_or_rec: str|binding.Record): # magic method of CacheDict
         if isinstance(name_or_rec, str):
             if rec := self._RK.getDef(name_or_rec):
-                return TableGenRecordWrapper(rec)
+                return TableGenRecordWrapper(rec, self)
             else:
                 return None
         else:
-            return TableGenRecordWrapper(name_or_rec)
+            return TableGenRecordWrapper(name_or_rec, self)
 
     def getRecord(self, name: str|binding.Record) -> TableGenRecord | None:
         return self.get(name, None) # use __getitem__ of CacheDict

@@ -1,4 +1,4 @@
-from .unit.record import TableGenRecord
+from ..unit.record import TableGenRecord
 from tablegen.unit.dag import DAG, Node
 
 class SetTheory:
@@ -41,4 +41,4 @@ class SetTheory:
                 case (op, *args):
                     raise NotImplementedError(f"({op.defname} with {len(args)} nodes) is not NotImplemented")
                 case _:
-                    raise ValueError(f"set thoery must be (op, *args) pattern")
+                    raise ValueError(f"set thoery must be (op, *args) pattern", member)

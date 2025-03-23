@@ -2,7 +2,7 @@ from tablegen.context import TableGenContext
 from tablegen.unit.record import TableGenRecord, TypedRecord
 from dataclasses import dataclass
 import pytest
-import tablegen.RecordKeeper as RK
+import tablegen.wrapper.recordkeeper as RK
 
 @dataclass
 class A(TypedRecord):
@@ -91,3 +91,7 @@ def test_2():
     if rk := ctx.getRecordKeeper():
         if lsta := rk.getDefs(A):
             assert len(list(lsta)) == 2
+    
+    v = ctx.A(12, "123")
+    print(ctx.A)
+    print("A Obj", v)

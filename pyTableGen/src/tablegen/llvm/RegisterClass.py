@@ -1,6 +1,6 @@
-from ..SetTheory import SetTheory
+from .SetTheory import SetTheory
 from ..unit.record import TableGenRecord
-from ..RecordKeeper import RecordKeeper
+from ..wrapper.recordkeeper import RecordKeeper
 from typing import Iterable
 from functools import lru_cache
 

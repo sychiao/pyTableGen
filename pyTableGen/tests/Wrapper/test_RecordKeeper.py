@@ -1,7 +1,7 @@
 import pytest
 import os
 
-import tablegen.RecordKeeper as RK
+import tablegen.wrapper.recordkeeper as RK
 from tablegen.unit.bits import Bits
 
 def test_CacheDict():

@@ -1,6 +1,6 @@
 import pytest
 from tablegen.unit.dag import DAG, Node
-import tablegen.RecordKeeper as RK
+import tablegen.wrapper.recordkeeper as RK
 
 def test_0():
     a = DAG('ADD', 'a', 'b')

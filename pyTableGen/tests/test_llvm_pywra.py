@@ -2,7 +2,7 @@ import functools
 import sys
 import os
 from typing import DefaultDict, Iterable
-from tablegen.RecordKeeper import RecordKeeper
+from tablegen.wrapper.recordkeeper import RecordKeeper
 import tablegen.binding as binding
 from tablegen.unit.dag import DAG, Node
 from tablegen.unit.record import TableGenRecord

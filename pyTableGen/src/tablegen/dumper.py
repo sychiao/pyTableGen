@@ -60,7 +60,6 @@ def dumpTblDecl(obj, name=None)->str:
 import textwrap
 
 def dumpTblRecord(obj: 'TableGenRecord')->str:
-    # args = [f"{dumpTblValue(ty)} {arg}" for arg, ty in obj.args()]
     add_fields = list()
     let_fields = list()
     if obj.additional_fields():

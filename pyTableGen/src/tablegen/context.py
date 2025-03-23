@@ -2,7 +2,7 @@ import tablegen.binding as binding
 from typing import overload, TypeVar, Generator, Tuple
 
 from .unit.record import TableGenRecord
-from .RecordKeeper import RecordKeeper
+from .wrapper.recordkeeper import RecordKeeper
 
 class Context:
     
@@ -60,6 +60,11 @@ class TableGenContext(Context):
     def getDefs(self, base: str|type, *clses: Tuple[str|type, ...]) -> Generator[TableGenRecord, None, None]:
         ... # pragma: no cover
 
+    def getClass(self, name: str):
+        if self.RK and (recls := self.RK.getClass(name)):
+            return recls
+        
+
     def getDefs(self, base=None, *clses): # type: ignore
         if self.RK:
             yield from self.RK.getDefs(base, *clses)
@@ -101,6 +106,8 @@ class TableGenContext(Context):
     def __getattr__(self, name):
         if rec := self.getRecord(name):
             return rec
+        elif reccls := self.getClass(name):
+            return reccls
         raise AttributeError(f"Record {name} not found")
 
     @property
@@ -109,3 +116,7 @@ class TableGenContext(Context):
         Get a record from the context, if the record is not found, it will raise a KeyError
         '''
         return self.get
+
+    @property
+    def getdef(self):
+        return self.getRecord
