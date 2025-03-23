@@ -13,6 +13,16 @@ class MetaTableGenType(type):
 
     def check(cls, instance):
         return super().__instancecheck__(instance)
+    
+    def __call__(cls, *args, **kwargs):
+        instance = super().__call__(*args, **kwargs)
+        
+        if hasattr(instance, "__late_init__") and callable(instance.__late_init__):
+            instance.__late_init__()
+
+        instance.__reset_field__ = set()
+        
+        return instance
 
     def __setattr__(self, name: str, value, /) -> None:
         '''

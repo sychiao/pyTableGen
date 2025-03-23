@@ -2,10 +2,14 @@ import tablegen.dumper as dumper
 from tablegen.unit.bits import Bits
 import re
 
-from tablegen.unit.record import TypedRecord, TableGenRecord
+from tablegen.unit.record import TypedRecord, TableGenRecord, UnknownObj
 from tablegen.unit.bits import Bits
 from dataclasses import dataclass, field
 from tablegen.dumper import dumpTblRecord
+
+from tablegen.context import TableGenContext
+import tablegen.wrapper.recordkeeper as RK
+
 
 
 class TextMatch:
@@ -59,3 +63,37 @@ def test_Record():
     print(A.a)
     print(">", dumper.dumpTblDef(A.a))
 
+content = '''
+class base1 {
+   string name = "base1";
+}
+class base2<string _prefix> {
+    string prefix = !strconcat(_prefix, "prefix");
+}
+
+defvar vv = {0,0,1,1};
+
+def base : base1;
+
+class A<int x, string v = "NAME"> : base1, base2<v> {
+    defvar xaVal = 21;
+    int a = 1;
+    int value = !add(x, xaVal);
+    base1 B = base;
+    bits<2> rec;
+    bits<4> XZ;
+    bits<8> Inst;
+    let XZ{0} = 0;
+    let XZ{1} = 1;
+    let XZ{3-2} = rec;
+}
+
+defvar yaVal = A<13>;
+
+def xA : A<12>;'''
+
+def test_context_dump():
+    ctx = TableGenContext(RK.RecordKeeper.loads(content))
+    rec = ctx.A(1, "123")
+    rec.let("rd", Bits[8]()).let("Inst", rec.rd)
+    print(rec.__def_dump__())

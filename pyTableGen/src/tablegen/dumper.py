@@ -71,3 +71,6 @@ def dumpTblRecord(obj: 'TableGenRecord')->str:
     additionalBody= "{\n" + textwrap.indent("\n".join(add_fields + let_fields), '    ') + "\n}" if add_fields else ""
     args = [f"{dumpTblValue(ty)} {arg}" for arg, ty in obj.args()]
     return f"{obj.getType().__class_dump__()}<{", ".join(args)}>{additionalBody}"
+
+def dumpTblDefStmt(obj: 'TableGenType|type[TableGenType]')->str:
+    pass

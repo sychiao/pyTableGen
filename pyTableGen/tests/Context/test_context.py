@@ -92,6 +92,8 @@ def test_2():
         if lsta := rk.getDefs(A):
             assert len(list(lsta)) == 2
     
-    v = ctx.A(12, "123")
+    v = ctx.A(12, "123").let("MMO", 1)
     print(ctx.A)
-    print("A Obj", v)
+    print("A Obj", v.__dump__())
+    print(v.additional_fields())
+    print(v.__reset_field__)

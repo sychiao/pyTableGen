@@ -25,7 +25,7 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return self._RK
 
     def setRecordKeeper(self, RK):
-        self._RK = RK
+        self._RK = RK        
 
     def __classes__(self):
         return tuple(record.getName() for record, _ in self._rec.getSuperClasses())
@@ -37,7 +37,6 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return {RecVal.getName(): self.RK.getValuefromRecTy(RecVal.getType()) for RecVal in self._rec.getValues()}
 
     def __items__(self):
-        self.__late_init__()
         return {key: self.__dict__[key] for key in self.fields}
 
     def _getValueInit(self, key: str):
@@ -50,7 +49,6 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return value.bind(key) if isinstance(value, Bits) else value
 
     def __getattr__(self, key: str):
-        print("TRY GET ATTR", id(self), key, object.__getattribute__(self, '__class__'))
         self.__dict__[key] = self._getValue(key)
         return self.__dict__[key]
 
@@ -82,6 +80,9 @@ class TableGenClassWrapper(TableGenRecordWrapper):
             keyname = name.replace(":", "_")
             args[keyname] = self.RK.getValuefromRecTy(self._rec.getValue(name).getType())
         return args
+    
+    def __late_init__(self):
+        pass
 
     def __items__(self):
         raise TypeError("TableGenClassWrapper object is not iterable")
@@ -89,8 +90,6 @@ class TableGenClassWrapper(TableGenRecordWrapper):
     def __call__(self, *args):
         print(self.args())
         return TableGenDummyRecord(self, *args)
-        #obj = TableGenRecord()
-        #return obj
 
     def __repr__(self):
         return f"TableGenClassWrapper({self.__recname__})"

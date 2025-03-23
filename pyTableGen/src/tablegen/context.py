@@ -103,7 +103,7 @@ class TableGenContext(Context):
             if rec := self.RK.getRecord(name):
                 return rec.bind(name, self)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> TableGenRecord:
         if rec := self.getRecord(name):
             return rec
         elif reccls := self.getClass(name):
