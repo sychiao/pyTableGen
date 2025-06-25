@@ -3,7 +3,7 @@ pybind11 example plugin
 """
 from __future__ import annotations
 import typing
-__all__ = ['BinOpInit', 'BinaryOp', 'BitInit', 'BitRecTy', 'BitsInit', 'BitsRecTy', 'DagInit', 'DagRecTy', 'DefInit', 'Init', 'InitKind', 'InitVector', 'IntInit', 'IntRecTy', 'ListInit', 'ListRecTy', 'OpInit', 'ParseTableGen', 'RecTy', 'RecTyKind', 'Record', 'RecordKeeper', 'RecordMap', 'RecordRecTy', 'RecordVal', 'RecordValVector', 'RecordVector', 'SMLoc', 'SMLocVector', 'SMRange', 'StringFormat', 'StringInit', 'StringInitVector', 'StringRecTy', 'StringVector', 'SuperClassVector', 'TypedInit', 'UnsetInit', 'VarBitInit', 'VarInit', 'getLLVMSourceLoc']
+__all__ = ['BinOpInit', 'BinaryOp', 'BitInit', 'BitRecTy', 'BitsInit', 'BitsRecTy', 'DagInit', 'DagRecTy', 'DefInit', 'Init', 'InitKind', 'InitVector', 'IntInit', 'IntRecTy', 'ListInit', 'ListRecTy', 'OpInit', 'ParseTableGen', 'RecTy', 'RecTyKind', 'Record', 'RecordKeeper', 'RecordMap', 'RecordRecTy', 'RecordVal', 'RecordValVector', 'RecordVector', 'SMLoc', 'SMLocVector', 'SMRange', 'StringFormat', 'StringInit', 'StringInitVector', 'StringRecTy', 'StringVector', 'SuperClassVector', 'TernOpInit', 'TypedInit', 'UnOpInit', 'UnaryOp', 'UnsetInit', 'VarBitInit', 'VarInit', 'getLLVMSourceLoc']
 class BinOpInit(OpInit):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -1321,6 +1321,18 @@ class SuperClassVector:
         """
         Remove and return the item at index ``i``
         """
+class TernOpInit(OpInit):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    def getLHS(self) -> Init:
+        ...
+    def getMHS(self) -> Init:
+        ...
+    def getOpcode(self) -> ...:
+        ...
+    def getRHS(self) -> Init:
+        ...
 class TypedInit(Init):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -1329,6 +1341,69 @@ class TypedInit(Init):
     def classof(arg0: Init) -> bool:
         ...
     def getType(self) -> RecTy:
+        ...
+class UnOpInit(OpInit):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    def getOpcode(self) -> UnaryOp:
+        ...
+    def getOperand(self) -> Init:
+        ...
+class UnaryOp:
+    """
+    Members:
+    
+      CAST
+    
+      NOT
+    
+      HEAD
+    
+      TAIL
+    
+      SIZE
+    
+      EMPTY
+    
+      GETDAGOP
+    """
+    CAST: typing.ClassVar[UnaryOp]  # value = <UnaryOp.CAST: 0>
+    EMPTY: typing.ClassVar[UnaryOp]  # value = <UnaryOp.EMPTY: 5>
+    GETDAGOP: typing.ClassVar[UnaryOp]  # value = <UnaryOp.GETDAGOP: 6>
+    HEAD: typing.ClassVar[UnaryOp]  # value = <UnaryOp.HEAD: 2>
+    NOT: typing.ClassVar[UnaryOp]  # value = <UnaryOp.NOT: 1>
+    SIZE: typing.ClassVar[UnaryOp]  # value = <UnaryOp.SIZE: 4>
+    TAIL: typing.ClassVar[UnaryOp]  # value = <UnaryOp.TAIL: 3>
+    __members__: typing.ClassVar[dict[str, UnaryOp]]  # value = {'CAST': <UnaryOp.CAST: 0>, 'NOT': <UnaryOp.NOT: 1>, 'HEAD': <UnaryOp.HEAD: 2>, 'TAIL': <UnaryOp.TAIL: 3>, 'SIZE': <UnaryOp.SIZE: 4>, 'EMPTY': <UnaryOp.EMPTY: 5>, 'GETDAGOP': <UnaryOp.GETDAGOP: 6>}
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    def __eq__(self, other: typing.Any) -> bool:
+        ...
+    def __getstate__(self) -> int:
+        ...
+    def __hash__(self) -> int:
+        ...
+    def __index__(self) -> int:
+        ...
+    def __init__(self, value: int) -> None:
+        ...
+    def __int__(self) -> int:
+        ...
+    def __ne__(self, other: typing.Any) -> bool:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def __setstate__(self, state: int) -> None:
+        ...
+    def __str__(self) -> str:
+        ...
+    @property
+    def name(self) -> str:
+        ...
+    @property
+    def value(self) -> int:
         ...
 class UnsetInit(Init):
     @staticmethod

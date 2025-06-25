@@ -49,7 +49,13 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return value.bind(key) if isinstance(value, Bits) else value
 
     def __getattr__(self, key: str):
-        self.__dict__[key] = self._getValue(key)
+        if key not in self.__dict__:
+            self.__dict__[key] = self._getValue(key)
+        return self.__dict__[key]
+    
+    def __getitem__(self, key: str):
+        if key not in self.__dict__:
+            self.__dict__[key] = self._getValue(key)
         return self.__dict__[key]
 
     def __late_init__(self):
@@ -72,6 +78,10 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
 
 class TableGenClassWrapper(TableGenRecordWrapper):
     
+    @property
+    def __name__(self):
+        return self.__recname__
+
     def args(self):
         args = dict()
         for init in self._rec.getTemplateArgs():

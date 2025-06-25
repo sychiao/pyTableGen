@@ -111,6 +111,8 @@ class Unset(TableGenType):
     def __defname__(self):
         return 'unset'
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return '??'
 
+    def __repr__(self) -> str:
+        return f'Unset({repr(self.__type)})'

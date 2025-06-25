@@ -1,4 +1,15 @@
 class Operator:
+    def __init__(self, opcode, *args):
+        self.opcode = opcode
+        self.args = args
+
+    def __call__(self):
+        raise NotImplementedError
+
+class Not(Operator):
+    def __init__(self, v):
+        self.v = v 
+
     def __call__(self):
         raise NotImplementedError
 

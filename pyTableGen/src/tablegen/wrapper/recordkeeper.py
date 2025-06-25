@@ -8,6 +8,9 @@ from ..utils import CacheDict
 from random import random
 import os
 
+from ..unit.operator import Operator, Add
+import tablegen.unit.operator as op
+
 from .record import TableGenClassWrapper, TableGenRecordWrapper
 
 def load(td: str, incDir: list[str] = list())->binding.RecordKeeper:
@@ -27,6 +30,13 @@ class Variable:
     
     def __repr__(self):
         return f"Var({self.name})"
+    
+    def __repr__(self):
+        if ":" in self.name:
+            _, name = self.name.split(":")
+        else:
+            name = self.name
+        return name
 
     def value(self, obj):
         return getattr(obj, self.name)
@@ -116,7 +126,7 @@ class RecordKeeper(CacheDict, Wrapper):
                 kwargs[name.getAsUnquotedString()] = self.getValuefromInit(arg)
         return DAG(op, **kwargs)
 
-    def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | str | int | bool | Bits | VarBit | Variable | Unset | DAG | list':
+    def getValuefromInit(self, v: binding.Init) -> 'TableGenRecord | Operator | str | int | bool | Bits | VarBit | Variable | Unset | DAG | list':
         if isinstance(v, binding.IntInit):
             return v.getValue() # int
         elif isinstance(v, binding.BitInit):
@@ -136,14 +146,32 @@ class RecordKeeper(CacheDict, Wrapper):
                 return ins
             raise ValueError(f"Record {v.getAsString()} not found")
         elif isinstance(v, binding.UnsetInit):
-            return Unset()
+            return Unset(None)
         elif isinstance(v, binding.DagInit):
             return self.getDagInit(v)
+        elif isinstance(v, binding.UnOpInit):
+            if v.getOpcode() == binding.UnaryOp.NOT:
+                return op.Not(self.getValuefromInit(v.getOperand()))
+            return f"Operator({v.getOpcode()}, {self.getValuefromInit(v.getOperand())})"
+        elif isinstance(v, binding.BinOpInit):
+            if v.getOpcode() == binding.BinaryOp.ADD:
+                # Special case for Add operator
+                return Add(self.getValuefromInit(v.getLHS()), self.getValuefromInit(v.getRHS()))
+            return f"Operator(\
+                {v.getOpcode()},\
+                {self.getValuefromInit(v.getLHS())},\
+                {self.getValuefromInit(v.getRHS())}\
+            )"
         else:
-            raise ValueError(f"Unknonw {v.getAsString()} {v.getKind()}")
+            return f"Unknonw {v.getAsString()} {v.getKind()}"
 
     def getClass(self, name: str) -> TableGenRecord | None:
         return TableGenClassWrapper(self._RK.getClass(name), self)
+    
+    def getClasses(self) -> dict[str, TableGenRecord]:
+        dct = {name: TableGenClassWrapper(cls, self) 
+               for name, cls in self._RK.getClasses().items()}
+        return dct
 
     def __getf__(self, name_or_rec: str|binding.Record): # magic method of CacheDict
         if isinstance(name_or_rec, str):

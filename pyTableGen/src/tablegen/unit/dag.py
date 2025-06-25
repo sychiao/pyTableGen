@@ -54,7 +54,10 @@ class DAG(Sequence):
         return len(self.nodes) + 1
 
     def __repr__(self):
-        return f'DAG({self.op.defname} {", ".join(map(str, self.items()))})'
+        try:
+            return f'DAG({self.op.defname} {", ".join(map(str, self.items()))})'
+        except AttributeError:
+            return f'DAG({self.op} !#! {type(self.op)} {", ".join(map(str, self.items()))})'
         
 
 

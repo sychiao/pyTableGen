@@ -65,6 +65,11 @@ class TableGenRecord(_TableGenRecord, TableGenType):
                     value.bind(name, self)
             super().__setattr__(name, value)
 
+    def __getitem__(self, key: str) -> Any:
+        if key not in self.__dict__:
+            self.__dict__[key] = self._getValue(key)
+        return self.__dict__[key]
+
     def __items__(self) -> dict[str, Any]:
         dctA = {key: getattr(self, key, UnknownObj()) for key in self.fields}
         dctB = {key: self.__dict__.get(key, UnknownObj()) for key in self.__dict__ if not key.startswith("_")}
