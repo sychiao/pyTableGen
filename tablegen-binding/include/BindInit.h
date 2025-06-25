@@ -23,9 +23,15 @@ public:
     using BinOpInit::BinaryOp;
 };
 
+class BindUnOpInit : public UnOpInit {
+public:
+    using UnOpInit::UnaryOp;
+};
+
 
 using pyInitKindEnum = py::enum_<BindInit::InitKind>;
 using pyBinaryOpEnum = py::enum_<BindBinOpInit::BinaryOp>;
+using pyUnaryOpEnum = py::enum_<BindUnOpInit::UnaryOp>;
 using pyStringFormatEnum = py::enum_<StringInit::StringFormat>;
 
 using pyInitClass = py::class_<Init>;
@@ -46,13 +52,14 @@ using pyVarBitInitClass  = py::class_<VarBitInit, TypedInit>;
 using pyCondOpInitClass  = py::class_<CondOpInit, TypedInit>;
 using pyOpInitClass = py::class_<OpInit, TypedInit>;
 using pyBinOpInitClass = py::class_<BinOpInit, OpInit>;
-
-
+using pyUnOpInitClass = py::class_<UnOpInit, OpInit>;
+using pyTernOpInitClass = py::class_<TernOpInit, OpInit>;
 
 
 struct _InitBindingImpl {
   pyInitKindEnum     pyinitkind;
   pyBinaryOpEnum     pybinop;
+  pyUnaryOpEnum      pyunop;
   pyStringFormatEnum pystrenum;
 
   pyInitClass        pyinitcls;
@@ -72,6 +79,8 @@ struct _InitBindingImpl {
   //pyExistsOpInitClass  pyexistsopinitcls;
   pyOpInitClass        pyopinitcls;
   pyBinOpInitClass     pybinopinitcls;
+  pyUnOpInitClass           pyunopinitcls;
+  pyTernOpInitClass         pytropinitcls;
 
   /* Var/Def */
   pyDefInitClass       pydefinitcls;
@@ -83,6 +92,7 @@ struct _InitBindingImpl {
   _InitBindingImpl(py::module &m) : 
     pyinitkind(m, "InitKind"),
     pybinop(m, "BinaryOp"),
+    pyunop(m, "UnaryOp"),
     pystrenum(m, "StringFormat"),
     pyinitcls(m, "Init"),
     pytypedinitcls(m, "TypedInit"),
@@ -95,6 +105,8 @@ struct _InitBindingImpl {
     pydaginitcls(m, "DagInit"),
     pyopinitcls(m, "OpInit"),
     pybinopinitcls(m, "BinOpInit"),
+    pyunopinitcls(m, "UnOpInit"),
+    pytropinitcls(m, "TernOpInit"),
     pydefinitcls(m, "DefInit"),
     pyvarinitcls(m, "VarInit"),
     pyvarbitinitcls(m, "VarBitInit")
@@ -102,6 +114,7 @@ struct _InitBindingImpl {
 
     void _def(pyInitKindEnum &);
     void _def(pyBinaryOpEnum &);
+    void _def(pyUnaryOpEnum &);
     void _def(pyStringFormatEnum &);
 
     void _def(pyInitClass &) ;
@@ -120,6 +133,8 @@ struct _InitBindingImpl {
     // Ops
     void _def(pyOpInitClass &) ;
     void _def(pyBinOpInitClass &);
+    void _def(pyUnOpInitClass &);
+    void _def(pyTernOpInitClass &);
 
     // Var
     void _def(pyDefInitClass &);
@@ -133,6 +148,7 @@ struct _InitBindingImpl {
     void def() {
         _def(pyinitkind);
         _def(pybinop);
+        _def(pyunop);
         _def(pystrenum);
         _def(pyinitcls);
         _def(pytypedinitcls);
@@ -145,9 +161,12 @@ struct _InitBindingImpl {
         _def(pylistinitcls);
         _def(pyopinitcls);
         _def(pybinopinitcls);
+        _def(pyunopinitcls);
+        _def(pytropinitcls);
         _def(pydefinitcls);
         _def(pyvarinitcls);
         _def(pyvarbitinitcls);
+        
     }
 };
 

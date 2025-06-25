@@ -53,6 +53,22 @@ void _InitBindingImpl::_def(pyInitKindEnum &kind) {
     ;
 }
 
+void _InitBindingImpl::_def(pyUnaryOpEnum &kind) {
+  /*
+  TOLOWER , TOUPPER , CAST , NOT ,
+  HEAD , TAIL , SIZE , EMPTY ,
+  GETDAGOP , LOG2 , REPR , LISTFLATTEN ,
+  INITIALIZED
+  */
+  kind.value("CAST", BindUnOpInit::CAST)
+      .value("NOT", BindUnOpInit::NOT)
+      .value("HEAD", BindUnOpInit::HEAD)
+      .value("TAIL", BindUnOpInit::TAIL)
+      .value("SIZE", BindUnOpInit::SIZE)
+      .value("EMPTY", BindUnOpInit::EMPTY)
+      .value("GETDAGOP", BindUnOpInit::GETDAGOP);
+}
+
 void _InitBindingImpl::_def(pyBinaryOpEnum &kind) {
   kind.value("ADD", BindBinOpInit::ADD)
       .value("SUB", BindBinOpInit::SUB)
@@ -112,6 +128,18 @@ void _InitBindingImpl::_def(pyBinOpInitClass &cls) {
     cls.def("getOpcode", &llvm::BinOpInit::getOpcode);
     cls.def("getLHS", &llvm::BinOpInit::getLHS, py::return_value_policy::reference);
     cls.def("getRHS", &llvm::BinOpInit::getRHS, py::return_value_policy::reference);
+}
+
+void _InitBindingImpl::_def(pyUnOpInitClass &cls) {
+  cls.def("getOpcode", &llvm::UnOpInit::getOpcode);
+  cls.def("getOperand", py::overload_cast<>(&llvm::UnOpInit::getOperand, py::const_), py::return_value_policy::reference);
+}
+
+void _InitBindingImpl::_def(pyTernOpInitClass &cls) {
+  cls.def("getOpcode", &llvm::TernOpInit::getOpcode);
+  cls.def("getLHS", &llvm::TernOpInit::getLHS, py::return_value_policy::reference);
+  cls.def("getRHS", &llvm::TernOpInit::getRHS, py::return_value_policy::reference);
+  cls.def("getMHS", &llvm::TernOpInit::getMHS, py::return_value_policy::reference);
 }
 
 struct BindStringInitImpl {
