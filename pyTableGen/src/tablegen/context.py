@@ -40,6 +40,12 @@ class Getter:
 
 class TableGenContext(Context):
 
+    @staticmethod
+    def load(td: str, incDir: list[str] = list()) -> 'TableGenContext':
+        from .wrapper.recordkeeper import RecordKeeper
+        RK = RecordKeeper.load(td, incDir)
+        return TableGenContext(RK)
+
     def __init__(self, RK: RecordKeeper | None = None):
         self.records = dict()
         self.classes = dict()
@@ -63,7 +69,6 @@ class TableGenContext(Context):
     def getClass(self, name: str):
         if self.RK and (recls := self.RK.getClass(name)):
             return recls
-        
 
     def getDefs(self, base=None, *clses): # type: ignore
         if self.RK:

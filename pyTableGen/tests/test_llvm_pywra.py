@@ -7,6 +7,7 @@ import tablegen.binding as binding
 from tablegen.unit.dag import DAG, Node
 from tablegen.unit.record import TableGenRecord
 from tablegen.llvm.RegisterClass import CodeGenRegister
+from tablegen.context import TableGenContext
 
 #source_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 #sys.path.append(os.path.join(source_path, '..', 'src'))
@@ -18,19 +19,17 @@ TargetDir = os.path.join(llvm_path, 'lib', 'Target', 'RISCV')
 riscv_td = os.path.join(TargetDir, 'RISCV.td')
 
 print("Load TableGen file:", riscv_td)
-recs = RecordKeeper.load(riscv_td, [incDir, TargetDir])
+ctx = TableGenContext.load(riscv_td, [incDir, TargetDir])
 
 dict_name = dict()
 from functools import lru_cache
 
-s = CodeGenRegister(recs).getSubRegisterClass(recs.GPR)
-print(s)
+s = CodeGenRegister(ctx).getSubRegisterClass(ctx.GPR)
+print("getsubregisterclass", s)
 
-for value, ty in recs.getClass("RegisterClass").args().items():
-    print(value, ty)
+#for value, ty in recs.getClass("RegisterClass").args().items():
+#    print(value, ty)
 
-print(recs.getClass("RegisterClass"))
-
-RegisterClass = recs.getClass("RegisterClass")
-
-x = RegisterClass("GPR", recs).let("SuperRegClass", recs.getClass("RegisterClass"))
+#print(recs.getClass("RegisterClass"))
+#RegisterClass = recs.getClass("RegisterClass")
+#x = RegisterClass("GPR", recs).let("SuperRegClass", recs.getClass("RegisterClass"))
