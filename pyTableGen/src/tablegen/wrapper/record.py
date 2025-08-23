@@ -89,7 +89,7 @@ class TableGenClassWrapper(TableGenRecordWrapper):
             name = init.getAsUnquotedString()
             keyname = name.replace(":", "_")
             args[keyname] = self.RK.getValuefromRecTy(self._rec.getValue(name).getType())
-        return args
+        return args        
     
     def __late_init__(self):
         pass
@@ -102,7 +102,9 @@ class TableGenClassWrapper(TableGenRecordWrapper):
         return TableGenDummyRecord(self, *args)
 
     def __repr__(self):
-        return f"TableGenClassWrapper({self.__recname__})"
+        argstr = "<" + ', '.join(f'{ty.__name__} {name}' for name, ty in self.args().items()) + ">" if self.args() else ""
+        fieldstr = ', '.join(f'{ty.__name__} {name}' for name, ty in self.fields.items() if ':' not in name)
+        return f"tblwrapper({self.__recname__}){argstr}{{{fieldstr}}}" \
 
 # TableGenRecord
 

@@ -75,7 +75,7 @@ class RecordKeeper(CacheDict, Wrapper):
     def getDefs(self, base: str | type[TableGenRecord] | None = None, *clses) -> Iterable[TableGenRecord]:
         try:
             if not base:
-                yield from self._getDefs(self._RK.getRecords())
+                yield from self._getDefs(self._RK.getDefs().values())
             else:
                 if not clses:
                     if isinstance(base, type):

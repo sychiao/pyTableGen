@@ -70,7 +70,7 @@ class Bits(TableGenType):
         raise TypeError(f"Bits type only accept int type for Bits[N], not {type(item)}")
 
     @classmethod
-    def castfrom(cls, value)->'Bits|None':
+    def castfrom(cls, value)->'Bits':
         if issubclass(type(value), Bits):
             return value
         elif isinstance(value, int):

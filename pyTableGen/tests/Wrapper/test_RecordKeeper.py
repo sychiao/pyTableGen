@@ -56,7 +56,7 @@ def xA : A<12>;'''
 def test_1():
     Recs = RK.RecordKeeper.loads(content)
     x = Recs.getRecord("xA")
-    
+    assert x
     assert x.a == 1
     assert x.value == 21 + 12
     assert x.B.name == "base1"
@@ -67,3 +67,12 @@ def test_1():
     # because rec == rec{1-0} rather than rec{0-1}
     assert x.XZ[2:4] == x.rec
     assert x.XZ[4:2] != x.rec
+
+def test_2():
+    print("Wrapper test 2")
+    Recs = RK.RecordKeeper.loads(content)
+    for name, reccls in Recs.getClasses().items():
+        print("class:", name, ":", reccls)
+    
+    for rec in Recs.getDefs():
+        print("def:", rec)
