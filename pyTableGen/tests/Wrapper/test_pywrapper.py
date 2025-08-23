@@ -26,6 +26,8 @@ def xA : A;
 
 class B {
     int a = 1;
+    bits<2> rd;
+    bits<4> enc = {1, rd{1-0}, 0};
     bits<4> b = 12;
     bit c = 1;
     string name = "123";
@@ -59,6 +61,8 @@ def xC : C;
     print("x", z.x)
     print("y", z.y)
     print("z", z.z)
+    print("z.rd", z.rd, z.rd[0].Owner)
+    print("z.enc", z.enc)
 
     class Empty:
         pass

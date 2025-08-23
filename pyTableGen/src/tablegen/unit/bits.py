@@ -1,6 +1,6 @@
 from typing import overload
 from ._base import TableGenType, Unset
-class VarBit(TableGenType):
+class VarBit:
     Owner: 'Bits'
 
     def __init__(self, Owner, index):
@@ -32,7 +32,7 @@ class VarBit(TableGenType):
 class Bits(TableGenType):
     Length = -1
     bits: tuple
-    __cache__ = dict()
+    __BitsTypesCache = dict()
 
     @staticmethod
     def toBit(bit):
@@ -61,12 +61,12 @@ class Bits(TableGenType):
 
     def __class_getitem__(cls, item):
         if isinstance(item, int):
-            if cs := Bits.__cache__.get(item):
+            if cs := Bits.__BitsTypesCache.get(item):
                 return cs
             else:
                 type_name = f'{cls.__name__}[{item}]'
-                Bits.__cache__[item] = type(type_name, (cls,), {'Length': item})
-                return Bits.__cache__[item]
+                Bits.__BitsTypesCache[item] = type(type_name, (cls,), {'Length': item})
+                return Bits.__BitsTypesCache[item]
         raise TypeError(f"Bits type only accept int type for Bits[N], not {type(item)}")
 
     @classmethod

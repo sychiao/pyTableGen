@@ -40,9 +40,6 @@ class _TableGenType:
     '''
     Magic methods for TableGenType for override
     '''
-    def __iscomplex__(self)->bool:
-        return False
-
     def __type__(self):
         return self.__class__
 

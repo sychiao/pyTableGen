@@ -71,8 +71,8 @@ class TableGenRecord(_TableGenRecord, TableGenType):
         return self.__dict__[key]
 
     def __items__(self) -> dict[str, Any]:
-        dctA = {key: getattr(self, key, UnknownObj()) for key in self.fields}
-        dctB = {key: self.__dict__.get(key, UnknownObj()) for key in self.__dict__ if not key.startswith("_")}
+        dctA = {key: getattr(self, key, None) for key in self.fields}
+        dctB = {key: val for key, val in self.__dict__.items() if not key.startswith("_")}
         return {**dctA, **dctB}
 
     def additional_fields(self) -> dict[str, tuple[Any, type]]:
@@ -90,25 +90,7 @@ class TableGenRecord(_TableGenRecord, TableGenType):
     
     def decl(self, name, type):
         pass
-    
-    def __or__(self, other):
-        return UnionRecord(self, other)
 
-class UnknownObj:
-    '''
-    This is a dummy object for TableGenRecord, it is used to represent unknown object
-    It's not equal to None and Unset, which is real value in TableGen
-    but UnknownObj has a value in the TableGen, but python doesn't know what it is
-    It's only use for TableGenDummyRecord
-    '''
-
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super().__new__(cls)
-        return cls.instance
-
-    def __repr__(self):
-        return f"Unk"
         
 class TableGenDummyRecord(TableGenRecord):
     '''
@@ -167,39 +149,4 @@ class TypedRecord(TableGenRecord):
     def args(self):
         s = inspect.get_annotations(self.getType().__init__)
         return [(key, ty) for key, ty in s.items() if key in self.fields]
-
-class UnionRecord(TableGenRecord):
-
-    def __init__(self, *recs):
-        lst = list()
-        for rec in recs:
-            if not isinstance(rec, TableGenRecord):
-                raise ValueError(f"UnionRecord only accept TableGenRecord, got {type(rec)}")
-            if isinstance(rec, UnionRecord):
-                lst.extend(rec.__recs)
-            else:
-                lst.append(rec)
-        self.__recs = tuple(lst)
-    
-    @LazyAttr
-    def __fields__(self):
-        return {key: ty for rec in self.__recs for key, ty in rec.fields.items()}
-    
-    @LazyAttr
-    def __base__(self):
-        return tuple(base for rec in self.__recs for base in rec.bases)
-
-    @LazyAttr
-    def __classes__(self):
-        return tuple(cls for rec in self.__recs for cls in rec.classes)
-    
-    @LazyAttr
-    def __items__(self):
-        return {key: self.__dict__[key] for key in self.fields}
-
-    def let_fields(self):
-        return {key: value for rec in self.__recs for key, value in rec.let_fields().items()}
-    
-    def additional_fields(self) -> dict[str, tuple[Any, type]]:
-        return {key: value for rec in self.__recs for key, value in rec.additional_fields().items()}
 

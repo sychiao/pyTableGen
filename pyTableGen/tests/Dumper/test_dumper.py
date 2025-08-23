@@ -2,7 +2,7 @@ import tablegen.dumper as dumper
 from tablegen.unit.bits import Bits
 import re
 
-from tablegen.unit.record import TypedRecord, TableGenRecord, UnknownObj
+from tablegen.unit.record import TypedRecord
 from tablegen.unit.bits import Bits
 from dataclasses import dataclass, field
 from tablegen.dumper import dumpTblRecord

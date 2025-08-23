@@ -29,9 +29,6 @@ class Variable:
         self.name = name
     
     def __repr__(self):
-        return f"Var({self.name})"
-    
-    def __repr__(self):
         if ":" in self.name:
             _, name = self.name.split(":")
         else:
