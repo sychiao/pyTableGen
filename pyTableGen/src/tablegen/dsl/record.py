@@ -82,32 +82,7 @@ class RecType(type):
                 return True
         return False
 
-class _ImplRecDump:
-    extra: dict[str, Any] = {}
-
-    def __dump__(self):
-        raise NotImplementedError
-
-    def dump(self, name=None):
-        name = name or self.tbl.name
-        if self.tbl.extra:
-            body = list()
-            body.extend([f"\t{type(v).__name__} {k};" for k, v in self.tbl.extra.items() if k not in self.fields])
-            body.extend([f"\tlet {k} = {v!r};" for k, v in self.tbl.extra.items()])
-            body = " {\n" + "\n".join(body) + "\n}"
-        else:
-            body = ";"
-        return f"def {name} : {self.__dump__()}{body}"
-    
-    def __setattr__(self, name: str, value) -> None:
-        if self.tbl.extra is not None:
-            print("setattr", name, value)
-            if not (name.startswith('_') and name.endswith('__')) \
-               and not name.startswith('_tbl'):
-                self.tbl.extra[name] = value
-        super().__setattr__(name, value)
-
-class _Record(_ImplRecDump, metaclass=RecType):
+class _Record(metaclass=RecType):
     # _tbl_metadata: TblRecMetaData | None = None
 
     @property
@@ -140,6 +115,14 @@ class _Record(_ImplRecDump, metaclass=RecType):
         instance.tbl.args = args
         instance.tbl.kwargs = kwargs
         return instance
+
+    def __setattr__(self, name: str, value) -> None:
+        if self.tbl.extra is not None:
+            print("setattr", name, value)
+            if not (name.startswith('_') and name.endswith('__')) \
+               and not name.startswith('_tbl'):
+                self.tbl.extra[name] = value
+        super().__setattr__(name, value)
 
 class UnkownValue:
     pass
@@ -184,12 +167,6 @@ class PyRecord(_Record):
 
     def __or__(self, other):
         return super().__or__(other)
-    
-    def __dump__(self):
-        if self.tbl.args:
-            return f"{self.__class__.__name__}<{', '.join(repr(arg) for arg in self.tbl.args)}>"
-        else:
-            return f"{self.__class__.__name__}"
 
 class UnionRecord[*K](_Record):
     _recs: tuple[PyRecord]
@@ -206,9 +183,6 @@ class UnionRecord[*K](_Record):
 
     def __repr__(self):
         return f"UnionRecord({', '.join(repr(rec) for rec in self.recs)})"
-    
-    def __dump__(self):
-        return ', '.join(rec.__dump__() for rec in self.recs)
 
     @overload
     def __or__[*T](self, other: 'UnionRecord[*T]') -> 'UnionRecord[*K, *T]':...

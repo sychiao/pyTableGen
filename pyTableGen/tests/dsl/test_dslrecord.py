@@ -1,5 +1,6 @@
 from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData, UnkownValue
 from tablegen.dsl.context import RecordContext
+from tablegen.dsl.dumper import dumpDef
 
 def test_1():
     class Rec(PyRecord):
@@ -38,7 +39,7 @@ def x : Rec<'A'>, RecY<'B'> {
 \tlet extra = 123;
 }'''
     assert golden.replace('\n','').replace('\t','') == \
-           ctx.x.dump().replace('\n','').replace('\t','')
+            dumpDef(ctx.x).replace('\n','').replace('\t','')
 
     # ctx.x only contains extra, value, index and _recs, and _tbl
     assert len(ctx.x.__dict__) == 5
