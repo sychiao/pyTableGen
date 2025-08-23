@@ -1,6 +1,16 @@
 class Unset:
     ''' it is used to represent unset value `?` in TableGen'''
-    pass
+    __instance = dict()
+
+    def __new__(cls, t):
+        try:
+            return cls.__instance[t]
+        except KeyError:
+            cls.__instance[t] = super().__new__(cls)
+            return cls.__instance[t]
+    
+    def __init__(self, type):
+        self._type = type
 
 class Unknown:
     ''' 
@@ -9,4 +19,14 @@ class Unknown:
     because we not sure the 'definition' inside TableGen
     we will place a UnknownValue to represent it.
     '''
-    pass
+    __instance = dict()
+
+    def __new__(cls, t):
+        try:
+            return cls.__instance[t]
+        except KeyError:
+            cls.__instance[t] = super().__new__(cls)
+            return cls.__instance[t]
+    
+    def __init__(self, type):
+        self._type = type

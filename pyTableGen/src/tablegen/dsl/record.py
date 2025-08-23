@@ -133,12 +133,6 @@ class _Record(_ImplRecDump, metaclass=RecType):
         if isinstance(other, _Record):
             return UnionRecord(*self.recs, *other.recs)
         raise NotImplementedError
-
-    def __getattr__(self, name: str):
-        value = object.__getattribute__(self, name)
-        if isinstance(value, UnknownValue):
-            raise AttributeError(f"Record {self.tbl.name} attribute {name} is not readable")
-        return value
     
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)
@@ -158,6 +152,7 @@ class TDRecord(_Record):
             cls.tbl.fields = metadata.fields
 
     def __init__(self, *args, **kwargs) -> None:
+        print("Create TDRecord", self.tbl.name, args, kwargs)
         if (len(self.tbl.signature) != len(args) + len(kwargs)):
             raise TypeError(f"{self.tbl.name} takes {len(self.tbl.signature)} arguments, got {len(args) + len(kwargs)}")
         for field, ty in self.tbl.fields.items():

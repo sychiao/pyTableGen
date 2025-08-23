@@ -1,4 +1,4 @@
-from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData
+from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData, UnkownValue
 from tablegen.dsl.context import RecordContext
 
 def test_1():
@@ -44,6 +44,9 @@ def x : Rec<'A'>, RecY<'B'> {
     assert len(ctx.x.__dict__) == 5
     assert ctx.x.val == 123
 
+def test_2():
+    print("=========== Test TDRecord ===========")
+    # Test TDRecord with metadata
     import types
     metadata = TblRecMetaData()
     metadata.fields = {'name': str, 'value': int}
@@ -51,7 +54,14 @@ def x : Rec<'A'>, RecY<'B'> {
     NewTDRecord = types.new_class("NewTDRecord", (TDRecord, ), {'metadata': metadata})
 
     class pyNewRecord(NewTDRecord):
-        pass
-    print(NewTDRecord.tbl.fields)
-    print(NewTDRecord.tbl.signature)
-    print(pyNewRecord.tbl.fields)
+        
+        def __init__(self, name: str, value: int = 0):
+            self.name = name
+            self.value = value
+
+    val = NewTDRecord('Test', 123)
+    print(val.name)
+    assert isinstance(val.name, UnkownValue)
+    val = pyNewRecord('Test', 123)
+    assert val.name == 'Test'
+    assert isinstance(val, NewTDRecord)
