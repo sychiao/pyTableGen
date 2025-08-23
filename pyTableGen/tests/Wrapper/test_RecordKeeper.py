@@ -32,10 +32,11 @@ class base1 {
 class base2<string _prefix> {
     string prefix = !strconcat(_prefix, "prefix");
 }
+class base3;
 
 defvar vv = {0,0,1,1};
 
-def base : base1;
+def base : base1, base3;
 
 class A<int x, string v = "NAME"> : base1, base2<v> {
     defvar xaVal = 21;
@@ -76,3 +77,8 @@ def test_2():
     
     for rec in Recs.getDefs():
         print("def:", rec)
+        for key, valu in rec.items.items():
+            if isinstance(valu, RK.TableGenRecord):
+                print(f"    {key}: {valu.defname} ({type(valu)}, {valu.classes})")
+            else:
+                print(f"    {key}: {valu} ({type(valu)})")
