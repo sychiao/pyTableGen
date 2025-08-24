@@ -74,7 +74,8 @@ class A<int x, string v = "NAME"> : base1, base2<v> {
 
 defvar yaVal = A<13>;
 
-def xA : A<12>;'''
+def xA : A<12>;
+'''
 
 
 def test_2():

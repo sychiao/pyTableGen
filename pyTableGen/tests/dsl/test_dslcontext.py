@@ -18,6 +18,10 @@ class base3 {
 
 defvar vv = {0,0,1,1};
 
+def emptry {
+  int value = 1;
+}
+
 def base : base1, base3;
 
 class A<int x, string v = "NAME"> : base1, base2<v> {
@@ -35,7 +39,14 @@ class A<int x, string v = "NAME"> : base1, base2<v> {
 
 defvar yaVal = A<13>;
 
-def xA : A<12>;'''
+def xA : A<12>;
+
+class BUGCLASS {
+  BUGCLASS self = !cast<BUGCLASS>(NAME);
+}
+
+def BUGDEF : BUGCLASS;
+'''
 
 def test_RK():
     print("Wrapper test 2")

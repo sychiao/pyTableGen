@@ -22,13 +22,13 @@ class CacheDict:
         raise NotImplementedError
 
     def __getitem__(self, key):
-        try:
-            return self.__cache__[key]
-        except KeyError:
+        if key not in self.__cache__:
             if ins := self.__getf__(key):
                 self.__cache__[key] = ins
                 return ins
-            raise KeyError
+            raise KeyError(f"{key} not in CacheDict")
+        else:
+            return self.__cache__[key]
 
     def get(self, key, default=None):
         try:

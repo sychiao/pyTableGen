@@ -40,7 +40,7 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return {RecVal.getName(): self.RK.getValuefromRecTy(RecVal.getType()) for RecVal in self._rec.getValues()}
 
     def __items__(self):
-        return {key: self.__dict__[key] for key in self.fields}
+        return {key: self.__getitem__(key) for key in self.fields}
 
     def _getValueInit(self, key: str):
         if v := self._rec.getValue(key):
@@ -61,10 +61,10 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
             self.__dict__[key] = self._getValue(key)
         return self.__dict__[key]
 
-    def __late_init__(self):
-        for key in self.fields:
-            if key not in self.__dict__:
-                self.__dict__[key] = self._getValue(key)
+    #def __late_init__(self):
+    #    for key in self.fields:
+    #        if key not in self.__dict__:
+    #            self.__dict__[key] = self._getValue(key)
 
     @classmethod
     def getTypedWrapper(cls, typedcls):

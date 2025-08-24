@@ -51,7 +51,6 @@ class RecType(type):
     '''
 
     def __eq__(self, ty):
-        print("Comparing RecType", self, ty)
         return True
     
     @property
@@ -59,7 +58,7 @@ class RecType(type):
         return self._tbl_metadata
     
     def __new__(mcls, name, bases, attrs, **kwds):
-        print("New RecType class", name)
+        # print("New RecType class", name)
         attrs["_tbl_metadata"] = TblRecMetaData()
         return super().__new__(mcls, name, bases, attrs, **kwds)
     
@@ -121,7 +120,7 @@ class _Record(metaclass=RecType):
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)
         instance._tbl_metadata = copy.copy(cls.tbl)
-        print("Creating _Record", cls, instance.tbl.name, args, kwargs, id(instance.tbl))
+        # print("Creating _Record", cls, instance.tbl.name, args, kwargs, id(instance.tbl))
         instance.tbl.args = args
         instance.tbl.kwargs = kwargs
         return instance
@@ -137,8 +136,8 @@ class TDRecord(_Record):
 
     def __init_subclass__(cls, metadata=None) -> None:
         if metadata:
-            print("Init TDRecord with metadata", cls, metadata.fields)
-            print("id of metadata:", id(cls.tbl))
+            # print("Init TDRecord with metadata", cls, metadata.fields)
+            # print("id of metadata:", id(cls.tbl))
             cls.tbl.fields = metadata.fields
             cls.tbl.signature = metadata.signature
 
@@ -150,7 +149,7 @@ class TDRecord(_Record):
 
     @classmethod
     def create(cls):
-        print([None] * len(cls.tbl.signature))
+        # print([None] * len(cls.tbl.signature))
         return cls(*([None] * len(cls.tbl.signature)))
 
     def __repr__(self) -> str:

@@ -23,8 +23,8 @@ class DAG(Sequence):
     op: TableGenRecord
     nodes: dict[str, Node]
 
-    def __init__(self, op, *args, **nodes):
-        self.op = op
+    def __init__(self, _op, *args, **nodes):
+        self.op = _op
         self.nodes = nodes
         for idx, arg in enumerate(args):
             nodes[f'{idx}'] = arg

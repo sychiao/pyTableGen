@@ -19,24 +19,31 @@ class TBLParser:
 
     def getTDRecord(self, rec):
         if rec not in self.TDRecordMapping:
-            tdrec = self.convertTableGenRecordWrapper2TDRecord(rec)
-            self.TDRecordMapping[rec] = tdrec
+            return self.convertTableGenRecordWrapper2TDRecord(rec)
         return self.TDRecordMapping[rec]
 
     def getTDRecordType(self, reccls):
+        # print("getTDRecordType: ", reccls)
+        # print("Bases:", reccls.bases)
         if reccls not in self.TDRecordTypeMapping:
             tdrec = self.convertTableGenClassWrapper2TDRecordType(reccls)
             self.TDRecordTypeMapping[reccls] = tdrec
+            for name, ty in tdrec.tbl.fields.items():
+                tdrec.tbl.fields[name] = self.castValue(ty)
         return self.TDRecordTypeMapping[reccls]
     
     def convertTableGenRecordWrapper2TDRecord(self, rec, TDRecMap=dict()):
         # print("Converting TableGenRecordWrapper to TDRecord", rec)
         clslst = [self.TDRecordTypeMapping[cls] for cls in rec.getBaseClasses()]
-        tdreccls = UnionTDRecord(*clslst) if len(clslst) > 1 else clslst[0]
+        if clslst:
+            tdreccls = UnionTDRecord(*clslst) if len(clslst) > 1 else clslst[0]
+        else:
+            tdreccls = TDRecord
         obj = tdreccls.create()
-        print("obj:", obj, "get items:")
-        print(rec.items)
+        # print("obj:", obj, "get items:", id(rec))
+        # print(rec.items)
         obj.tbl.file = self.file
+        self.TDRecordMapping[rec] = obj
         for key, valu in rec.items.items():
             if isinstance(valu, RK.TableGenRecord):
                 setattr(obj, key, self.getTDRecord(valu))
@@ -45,19 +52,18 @@ class TBLParser:
         return obj
 
     def convertTableGenClassWrapper2TDRecordType(self, reccls, TDRecMap=dict()):
-        # print("Converting TableGenClassWrapper to TDRecordType", reccls)
-        # print("bases: ")
         bases = []
         for base in reccls.bases:
+            # print(">> Bases:", base)
             bases.append(self.getTDRecordType(self.Recs.getClass(base)))
         metadata = TblRecMetaData()
         metadata.name = reccls.defname
         metadata.file = self.file
         metadata.signature = tuple(reccls.args().items())
-        metadata.fields = {name: self.castValue(ty) for name, ty in reccls.fields.items() if ':' not in name}
-        print("================")
-        print("metadata.fields:", metadata.fields, id(metadata))
-        print("metadata.signature:", metadata.signature)
+        metadata.fields = {name: ty for name, ty in reccls.fields.items() if ':' not in name}
+        # print("================")
+        # print("metadata.fields:", metadata.fields, id(metadata))
+        # print("metadata.signature:", metadata.signature)
         if bases:
             return types.new_class(reccls.defname, tuple(bases), {'metadata': metadata})
         else:
@@ -88,14 +94,31 @@ class RecordContext(SimpleNamespace):
 
     def __init__(self):
         super().__init__()
+        self.RK = None
+        self.lazy = False
         self.__classesMapping = dict()
 
     @classmethod
-    def load(cls, RK: RecordKeeper):
+    def load(cls, RK: RecordKeeper, lazy=False):
         ctx = cls()
-        for name, value in TBLParser(RK).parse():
-            setattr(ctx, name, value)
+        if not lazy:
+            for name, value in TBLParser(RK).parse():
+                setattr(ctx, name, value)
+        ctx.RK = RK
+        ctx.lazy = lazy
         return ctx
+    
+    def __getattr__(self, name: str) -> Any:
+        if self.lazy and self.RK is not None:
+            if rec := self.RK.getRecord(name):
+                tdrec = TBLParser(self.RK).castValue(rec)
+                setattr(self, name, tdrec)
+                return tdrec
+            elif reccls := self.RK.getClass(name):
+                tdreccls = TBLParser(self.RK).castValue(reccls)
+                setattr(self, name, tdreccls)
+                return tdreccls
+        raise AttributeError(f"RecordContext has no attribute {name}")
     
     def getRecordsByType(self, reccls):
         if reccls.__name__ in self.__classesMapping:
