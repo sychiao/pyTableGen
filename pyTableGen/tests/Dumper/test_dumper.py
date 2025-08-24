@@ -42,11 +42,11 @@ def test_dumpTblDecl():
     #a = Bits('01011')
     Bits.b = Bits[4]()
     #print(dumper.dumpTblDecl(a))
-    print(dumper.dumpTblDecl(Bits.b))
+    #print(dumper.dumpTblDecl(Bits.b))
 
 def test_def():
     Bits.b = Bits[5]('01011')
-    print(dumper.dumpTblDef(Bits.b))
+    #print(dumper.dumpTblDef(Bits.b))
 
 @dataclass
 class A(TypedRecord):

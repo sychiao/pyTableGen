@@ -1,5 +1,5 @@
 from typing import overload
-from ._base import TableGenType, Unset
+from .value import Unset
 class VarBit:
     Owner: 'Bits'
 
@@ -14,22 +14,35 @@ class VarBit:
     
     def __eq__(self, other):
         if isinstance(other, VarBit):
-            return self.Owner.defname == other.Owner.defname and self.index == other.index
+            return self.Owner.name == other.Owner.name and self.index == other.index
         return self.value() == other
 
     def __hash__(self) -> int:
         return hash((id(self.Owner), self.index))
 
     def __dump__(self):
-        return f'{self.Owner.defname}{{{self.index}}}'
+        return f'{self.Owner.name}{{{self.index}}}'
 
     def __repr__(self):
         if self.value():
             return f'{self.value()}'
         else:
-            return f'{self.Owner.defname}[{self.index}]'        
+            return f'{self.Owner.name}[{self.index}]'        
 
-class Bits(TableGenType):
+class BitsMeta(type):
+    __instance_cache = dict()
+
+    def __getattr__(cls, name):
+        try:
+            return cls.__instance_cache[name]
+        except KeyError:
+            raise AttributeError(f"{cls.__name__} has no attribute {name}")
+
+    def __setattr__(cls, name, value):
+        value.bind(name, cls)
+        cls.__instance_cache[name] = value
+
+class Bits(metaclass=BitsMeta):
     Length = -1
     bits: tuple
     __BitsTypesCache = dict()
@@ -42,6 +55,13 @@ class Bits(TableGenType):
             return '0'
         else:
             return '1'
+        
+    def bind(self, name: str, parent = None):
+        self.name = name
+        return self
+    
+    def defname(self):
+        return self.name
 
     def __init__(self, bits = None):
         if bits:
@@ -58,6 +78,9 @@ class Bits(TableGenType):
                 self.Length = len(bits)
         else:
             self.bits = tuple([VarBit(self, i) for i in range(self.Length)])
+
+        self.__class__ = Bits[self.Length] # implict cast to Bits[N]
+        self.name = "__no_name"
 
     def __class_getitem__(cls, item):
         if isinstance(item, int):

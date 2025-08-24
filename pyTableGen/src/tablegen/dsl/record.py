@@ -1,7 +1,8 @@
 from collections.abc import Sequence, Mapping
 from typing import Any, overload, Self
 import inspect
-from types import MappingProxyType, new_class
+from types import new_class
+from tablegen.unit.value import UnknownValue
 import copy
 
 class TblRecMetaData:
@@ -124,9 +125,6 @@ class _Record(metaclass=RecType):
                 self.tbl.extra[name] = value
         super().__setattr__(name, value)
 
-class UnkownValue:
-    pass
-
 class TDRecord(_Record):
 
     def __init_subclass__(cls, metadata=None) -> None:
@@ -139,7 +137,7 @@ class TDRecord(_Record):
         if (len(self.tbl.signature) != len(args) + len(kwargs)):
             raise TypeError(f"{self.tbl.name} takes {len(self.tbl.signature)} arguments, got {len(args) + len(kwargs)}")
         for field, ty in self.tbl.fields.items():
-            setattr(self, field, UnkownValue())
+            setattr(self, field, UnknownValue(ty))
 
     @classmethod
     def create(cls):

@@ -4,6 +4,7 @@ from ..wrapper.recordkeeper import RecordKeeper
 import tablegen.wrapper.recordkeeper as RK
 import types
 from .record import TDRecord, UnionTDRecord, TblRecMetaData
+import tablegen.unit.dag as dag
 
 class TBLParser:
 
@@ -45,11 +46,25 @@ class TBLParser:
         metadata = TblRecMetaData()
         metadata.name = reccls.defname
         metadata.signature = tuple(reccls.args().items())
-        metadata.fields = {name: ty for name, ty in reccls.fields.items() if ':' not in name}        
+        metadata.fields = {name: self.castValue(ty) for name, ty in reccls.fields.items() if ':' not in name}
+        print("metadata.fields:", metadata.fields)
         if bases:
             return types.new_class(reccls.defname, tuple(bases), {'metadata': metadata})
         else:
             return types.new_class(reccls.defname, (TDRecord, ), {'metadata': metadata})
+    
+    def castValue(self, _value):
+        if isinstance(_value, RK.TableGenClassWrapper):
+            return self.getTDRecordType(_value)
+        elif isinstance(_value, RK.TableGenRecordWrapper):
+            return self.getTDRecord(_value)
+        elif isinstance(_value, dag.DAG):
+            new_dag = dag.DAG(self.castValue(_value.op))
+            for name, node in _value.nodes.items():
+                new_dag.nodes[name] = dag.Node(node.name, self.castValue(node.value))
+            return new_dag
+        else:
+            return _value
 
 class RecordContext(SimpleNamespace):
 

@@ -2,7 +2,8 @@ from typing import ClassVar, Any, Self
 import typing
 import inspect
 
-from ._base import TableGenType, Unset
+from ._base import TableGenType
+from .value import Unset
 from .bits import Bits
 from ..utils import LazyAttr
 

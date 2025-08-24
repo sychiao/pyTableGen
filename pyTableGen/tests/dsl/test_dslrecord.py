@@ -1,4 +1,4 @@
-from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData, UnkownValue, UnionTDRecord
+from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData, UnknownValue, UnionTDRecord
 from tablegen.dsl.context import RecordContext
 from tablegen.dsl.dumper import dumpDef
 
@@ -62,7 +62,7 @@ def test_2():
 
     val = NewTDRecord('Test', 123)
     print(val.name)
-    assert isinstance(val.name, UnkownValue)
+    assert isinstance(val.name, UnknownValue)
     val = pyNewRecord('Test', 123)
     assert val.name == 'Test'
     assert isinstance(val, NewTDRecord)
