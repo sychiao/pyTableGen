@@ -1,4 +1,4 @@
-from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData, UnkownValue
+from tablegen.dsl.record import PyRecord, TDRecord, TblRecMetaData, UnkownValue, UnionTDRecord
 from tablegen.dsl.context import RecordContext
 from tablegen.dsl.dumper import dumpDef
 

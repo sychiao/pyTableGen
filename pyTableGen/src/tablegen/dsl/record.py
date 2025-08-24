@@ -52,7 +52,7 @@ class RecType(type):
         return True
     
     @property
-    def tbl(self):
+    def tbl(self) -> TblRecMetaData:
         return self._tbl_metadata
     
     def __new__(mcls, name, bases, attrs, **kwds):
@@ -77,16 +77,17 @@ class RecType(type):
         return ins
     
     def __instancecheck__(self, instance: Any) -> bool:
-        for rec in instance.recs:
-            if issubclass(type(rec), self):
-                return True
+        if issubclass(type(instance), _Record):
+            for rec in instance.recs:
+                if issubclass(type(rec), self):
+                    return True
         return False
 
 class _Record(metaclass=RecType):
     # _tbl_metadata: TblRecMetaData | None = None
 
     @property
-    def tbl(self):
+    def tbl(self) -> TblRecMetaData:
         return self._tbl_metadata or TblRecMetaData()
 
     @property
@@ -118,7 +119,6 @@ class _Record(metaclass=RecType):
 
     def __setattr__(self, name: str, value) -> None:
         if self.tbl.extra is not None:
-            print("setattr", name, value)
             if not (name.startswith('_') and name.endswith('__')) \
                and not name.startswith('_tbl'):
                 self.tbl.extra[name] = value
@@ -140,9 +140,41 @@ class TDRecord(_Record):
             raise TypeError(f"{self.tbl.name} takes {len(self.tbl.signature)} arguments, got {len(args) + len(kwargs)}")
         for field, ty in self.tbl.fields.items():
             setattr(self, field, UnkownValue())
+
+    @classmethod
+    def create(cls):
+        print([None] * len(cls.tbl.signature))
+        return cls(*([None] * len(cls.tbl.signature)))
+    
+
+    
+    def __repr__(self) -> str:
+        lst = []
+        for name, value in self.__dict__.items():
+            if name in self.tbl.fields:
+                if isinstance(value, _Record):
+                    lst.append(f"{name}={value.__class__.__name__}(obj={hex(id(value))})")
+                else:
+                    lst.append(f"{name}={value!r}")
+        return f"{self.__class__.__name__}(obj={hex(id(self))})" + \
+                f"{{{', '.join(lst)}}}"
     
     def __dump__(self):
         raise TypeError("TDRecord cannot be dumped directly")
+
+def UnionTDRecord(*tys : type[TDRecord], cache = dict()):
+    tyset = list(sorted({ty.__name__:ty for ty in tys}.values(), key=lambda x: x.__name__))
+    name = "U_" + "_OR_".join(ty.__name__ for ty in tys)
+    try:
+        return cache[name]
+    except KeyError:
+        cache[name] = new_class(name, tuple(tyset))
+        tbl: TblRecMetaData = cache[name].tbl
+        tbl.signature = tuple()
+        tbl.fields = {}
+        for ty in tyset:
+            tbl.fields |= ty.tbl.fields
+        return cache[name]
 
 class PyRecord(_Record):
 
@@ -171,7 +203,7 @@ class PyRecord(_Record):
 class UnionRecord[*K](_Record):
     _recs: tuple[PyRecord]
 
-    def __init__(self, *recs):
+    def __init__(self, *recs: _Record):
         self._recs = recs
         for rec in recs:
             self.__dict__.update(rec.__dict__)

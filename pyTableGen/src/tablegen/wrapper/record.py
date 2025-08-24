@@ -25,7 +25,10 @@ class TableGenRecordWrapper(Wrapper, TableGenRecord):
         return self._RK
 
     def setRecordKeeper(self, RK):
-        self._RK = RK        
+        self._RK = RK
+
+    def getBaseClasses(self):
+        return [self.RK.getClass(cls_name) for cls_name in self.bases]
 
     def __classes__(self):
         return tuple(record.getName() for record, _ in self._rec.getSuperClasses())
@@ -85,7 +88,6 @@ class TableGenClassWrapper(TableGenRecordWrapper):
     def args(self):
         args = dict()
         for init in self._rec.getTemplateArgs():
-            print("try find template args", init.getAsString())
             name = init.getAsUnquotedString()
             keyname = name.replace(":", "_")
             args[keyname] = self.RK.getValuefromRecTy(self._rec.getValue(name).getType())
