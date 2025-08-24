@@ -27,10 +27,11 @@ class TblRecMetaData:
 
     def __init__(self):
         self.name = ""
-        self.signature = tuple()
+        self.signature = None
         self.fields = dict()
         self.bases = tuple()
         self.tdrec = None
+        self.file = None
         self.args = tuple()
         self.kwargs = dict()
         self.recs = tuple()
@@ -50,6 +51,7 @@ class RecType(type):
     '''
 
     def __eq__(self, ty):
+        print("Comparing RecType", self, ty)
         return True
     
     @property
@@ -57,9 +59,9 @@ class RecType(type):
         return self._tbl_metadata
     
     def __new__(mcls, name, bases, attrs, **kwds):
-        cls = super().__new__(mcls, name, bases, attrs, **kwds)
-        cls._tbl_metadata = TblRecMetaData()
-        return cls
+        print("New RecType class", name)
+        attrs["_tbl_metadata"] = TblRecMetaData()
+        return super().__new__(mcls, name, bases, attrs, **kwds)
     
     def __init__(self, name, bases, attrs, **kwds):
         super().__init__(name, bases, attrs, **kwds)
@@ -68,12 +70,13 @@ class RecType(type):
         for base in bases:
             if hasattr(base, '_tbl_metadata') and base._tbl_metadata:
                 self.tbl.fields |= base._tbl_metadata.fields
-        if not self.tbl.signature and hasattr(self, '__init__'):
+        if self.tbl.signature is None and hasattr(self, '__init__'):
             sig = [(name, param.annotation) for name, param in inspect.signature(self.__init__).parameters.items()]
             self.tbl.signature = tuple(sig[1:])
 
     def __call__(self, *args, **kwds):
         ins = super().__call__(*args, **kwds)
+        ins.tbl.name = None
         ins.tbl.extra = ins.tbl.extra or {}
         return ins
     
@@ -82,6 +85,10 @@ class RecType(type):
             for rec in instance.recs:
                 if issubclass(type(rec), self):
                     return True
+            if self is not TDRecord:
+                if tdrec := getattr(instance.tbl, 'tdrec', None):
+                    if issubclass(tdrec, self):
+                        return True
         return False
 
 class _Record(metaclass=RecType):
@@ -114,6 +121,7 @@ class _Record(metaclass=RecType):
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)
         instance._tbl_metadata = copy.copy(cls.tbl)
+        print("Creating _Record", cls, instance.tbl.name, args, kwargs, id(instance.tbl))
         instance.tbl.args = args
         instance.tbl.kwargs = kwargs
         return instance
@@ -128,12 +136,13 @@ class _Record(metaclass=RecType):
 class TDRecord(_Record):
 
     def __init_subclass__(cls, metadata=None) -> None:
-        print("Init TDRecord", cls, metadata)
         if metadata:
+            print("Init TDRecord with metadata", cls, metadata.fields)
+            print("id of metadata:", id(cls.tbl))
             cls.tbl.fields = metadata.fields
+            cls.tbl.signature = metadata.signature
 
     def __init__(self, *args, **kwargs) -> None:
-        print("Create TDRecord", self.tbl.name, args, kwargs)
         if (len(self.tbl.signature) != len(args) + len(kwargs)):
             raise TypeError(f"{self.tbl.name} takes {len(self.tbl.signature)} arguments, got {len(args) + len(kwargs)}")
         for field, ty in self.tbl.fields.items():
@@ -143,9 +152,7 @@ class TDRecord(_Record):
     def create(cls):
         print([None] * len(cls.tbl.signature))
         return cls(*([None] * len(cls.tbl.signature)))
-    
 
-    
     def __repr__(self) -> str:
         lst = []
         for name, value in self.__dict__.items():
@@ -177,15 +184,18 @@ def UnionTDRecord(*tys : type[TDRecord], cache = dict()):
 class PyRecord(_Record):
 
     def __init_subclass__(cls, TDRecord=None) -> None:
-        if TDRecord and cls == TDRecord:
+        if TDRecord and cls != TDRecord:
             raise TypeError(f"TDRecord must be the same as cls, got {TDRecord} and {cls}")
         cls.tbl.tdrec = TDRecord
+        if TDRecord:
+            cls.tbl.signature = TDRecord.tbl.signature
+            cls.tbl.fields = TDRecord.tbl.fields
 
     def __repr__(self) -> str:
         if self.tbl.kwargs:
             return f'''PyRecord({", ".join(f"{k}={v!r}" for k, v in self.tbl.kwargs.items())})'''
         else:
-            return f'''PyRecord({", ".join(self.tbl.args)})'''
+            return f'''PyRecord({", ".join(str(arg) for arg in self.tbl.args)})'''
 
     @overload
     def __or__[*T](self, other: 'UnionRecord[*T]') -> 'UnionRecord[Self, *T]':

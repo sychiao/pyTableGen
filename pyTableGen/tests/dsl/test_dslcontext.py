@@ -1,7 +1,9 @@
 import tablegen.wrapper.recordkeeper as RK
 from tablegen.unit.bits import Bits
-from tablegen.dsl.record import TDRecord, UnionTDRecord, TblRecMetaData
-from tablegen.dsl.context import TBLParser
+from tablegen.dsl.record import RecType, TDRecord, UnionTDRecord, TblRecMetaData, PyRecord
+from tablegen.dsl.context import RecordContext
+from tablegen.dsl.dumper import dumpDef
+import sys
 
 content = '''
 class base1 {
@@ -10,7 +12,9 @@ class base1 {
 class base2<string _prefix> {
     string prefix = !strconcat(_prefix, "prefix");
 }
-class base3;
+class base3 {
+  int value = 123;
+}
 
 defvar vv = {0,0,1,1};
 
@@ -21,6 +25,7 @@ class A<int x, string v = "NAME"> : base1, base2<v> {
     int a = 1;
     int value = !add(x, xaVal);
     base1 B = base;
+    dag d = (base 1:$rd, 2:$rs2, 3:$rs1);
     bits<2> rec;
     bits<4> XZ;
     let XZ{0} = 0;
@@ -34,21 +39,32 @@ def xA : A<12>;'''
 
 def test_RK():
     print("Wrapper test 2")
-    TDRecMap = dict()
     Recs = RK.RecordKeeper.loads(content)
-    parser = TBLParser(Recs)
-    for name, reccls in Recs.getClasses().items():
-        parser.getTDRecordType(reccls)
+    ctx = RecordContext.load(Recs)
 
-    print("----- Classes -----")
-    for k, v in parser.TDRecordTypeMapping.items():
-        print(f">> {v.__name__} {v.__mro__})")
+    for name, value in ctx.__dict__.items():
+        if isinstance(value, RecType):
+            print(f"class ctx.{name}", "==\n", value)
+            print("\t>", value.__mro__)
+            print("\t>", value.tbl.fields, id(value.tbl))
+        else:
+            print(f"def ctx.{name}", "==\n", value)
 
-    print('----- Definitions -----')
-    lst = list()
-    for rec in Recs.getDefs():
-        rr = parser.getTDRecord(rec)
-        lst.append(rr)
+    class A(PyRecord, TDRecord=ctx.A):
 
-    for rr in lst:
-        print(rr)
+        def __init__(self, x: int, v: str = "NAME"):
+            self.xaVal = 21
+            self.a = 1
+
+    ta = ctx.A(1, "123")
+    a = A(1, "123")
+    print(ctx.base1.tbl.signature)
+    ctx.obj = ctx.base1()
+    print(a)
+    print(isinstance(a, ctx.A))
+    a.value = 12
+    a.new_val = ctx.obj
+    print(ctx.obj.tbl.file)
+    ctx.dump(sys.stdout, [a])
+    print(ctx.obj.tbl.file)
+    print(ctx.xA.tbl.file)

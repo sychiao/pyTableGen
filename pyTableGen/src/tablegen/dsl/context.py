@@ -3,12 +3,16 @@ from typing import Any
 from ..wrapper.recordkeeper import RecordKeeper
 import tablegen.wrapper.recordkeeper as RK
 import types
-from .record import TDRecord, UnionTDRecord, TblRecMetaData
+from .record import TDRecord, UnionTDRecord, TblRecMetaData, _Record
 import tablegen.unit.dag as dag
+from collections import defaultdict, deque
+
+from .dumper import dumpDef
 
 class TBLParser:
 
-    def __init__(self, Recs):
+    def __init__(self, Recs: RecordKeeper):
+        self.file = Recs._RK.getInputFilename()
         self.Recs = Recs
         self.TDRecordMapping = dict()
         self.TDRecordTypeMapping = dict()
@@ -30,6 +34,9 @@ class TBLParser:
         clslst = [self.TDRecordTypeMapping[cls] for cls in rec.getBaseClasses()]
         tdreccls = UnionTDRecord(*clslst) if len(clslst) > 1 else clslst[0]
         obj = tdreccls.create()
+        print("obj:", obj, "get items:")
+        print(rec.items)
+        obj.tbl.file = self.file
         for key, valu in rec.items.items():
             if isinstance(valu, RK.TableGenRecord):
                 setattr(obj, key, self.getTDRecord(valu))
@@ -45,9 +52,12 @@ class TBLParser:
             bases.append(self.getTDRecordType(self.Recs.getClass(base)))
         metadata = TblRecMetaData()
         metadata.name = reccls.defname
+        metadata.file = self.file
         metadata.signature = tuple(reccls.args().items())
         metadata.fields = {name: self.castValue(ty) for name, ty in reccls.fields.items() if ':' not in name}
-        print("metadata.fields:", metadata.fields)
+        print("================")
+        print("metadata.fields:", metadata.fields, id(metadata))
+        print("metadata.signature:", metadata.signature)
         if bases:
             return types.new_class(reccls.defname, tuple(bases), {'metadata': metadata})
         else:
@@ -65,12 +75,88 @@ class TBLParser:
             return new_dag
         else:
             return _value
+        
+    def parse(self):
+        for name, cls in self.Recs.getClasses().items():
+            ty = self.getTDRecordType(cls)
+            yield name, ty
+        for rec in self.Recs.getDefs():
+            tdrec = self.getTDRecord(rec)
+            yield rec.defname, tdrec
 
 class RecordContext(SimpleNamespace):
 
-    def load(self, RK: RecordKeeper):
-        pass
+    def __init__(self):
+        super().__init__()
+        self.__classesMapping = dict()
+
+    @classmethod
+    def load(cls, RK: RecordKeeper):
+        ctx = cls()
+        for name, value in TBLParser(RK).parse():
+            setattr(ctx, name, value)
+        return ctx
+    
+    def getRecordsByType(self, reccls):
+        if reccls.__name__ in self.__classesMapping:
+            return self.__classesMapping.get(reccls.__name__, [])
+        lst = [obj for obj in self.__dict__.values() \
+                if isinstance(obj, _Record) and isinstance(obj, reccls)]
+        self.__classesMapping[reccls.__name__] = lst
+        return lst
 
     def __setattr__(self, name: str, value: Any) -> None:
-        value.tbl.name = name
+        if isinstance(value, _Record):
+            value.tbl.name = name
         return super().__setattr__(name, value)
+    
+    def dump(self, file, objs):
+        if objs is None:
+            self.dumpAll(file)
+        else:
+            if isinstance(file, str):
+                with open(file, 'a') as f:
+                    self.dump(f, objs)
+            else:
+                for obj in objs:
+                    if obj not in self.__dict__.values():
+                        raise ValueError(f"Object {obj} is not in the context")
+                  
+                for obj in merge_ordered_lists(self.dumpOrder(obj) for obj in objs):
+                    if obj.tbl.file is not None:
+                        raise ValueError(f"Object {obj} has been dumped to {obj.tbl.file}, cannot dump again")
+                    obj.tbl.file = file.name
+                    print(dumpDef(obj), file=file)
+
+    def dumpOrder(self, obj, lst=None):
+        lst = lst or deque()
+        lst.append(obj)
+        for k, v in obj.__dict__.items():
+            if isinstance(v, _Record):
+                self.dumpOrder(v, lst)
+        return list(reversed(lst))
+
+def merge_ordered_lists(lists):
+    # 建圖
+    graph = defaultdict(set)
+    indegree = defaultdict(int)
+
+    for lst in lists:
+        for a, b in zip(lst, lst[1:]):
+            if b not in graph[a]:  # 避免重複邊
+                graph[a].add(b)
+                indegree[b] += 1
+            indegree.setdefault(a, 0)  # 確保 a 也在 indegree 裡
+
+    # 拓撲排序 (Kahn’s algorithm)
+    q = deque([n for n, d in indegree.items() if d == 0])
+    result = []
+    while q:
+        node = q.popleft()
+        result.append(node)
+        for nei in graph[node]:
+            indegree[nei] -= 1
+            if indegree[nei] == 0:
+                q.append(nei)
+
+    return result

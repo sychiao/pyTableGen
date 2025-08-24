@@ -41,6 +41,7 @@ intr.z = intr.y # in the record def it's not nessacery, if intr.y is not unknown
 ```
 intr = Instruction(*args)
 intr # it will become an PyRecord
-intr.dumpdef() # def <name> : cls<>;
-intr.dump() # cls<>;
+dump_def(intr) # def <name> : cls<>;
+dump(intr) # cls<>;
+ctx.dump(file)
 ```
