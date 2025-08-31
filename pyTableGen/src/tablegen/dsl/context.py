@@ -1,4 +1,4 @@
-from types import SimpleNamespace
+from types import ModuleType
 from typing import Any
 from ..wrapper.recordkeeper import RecordKeeper
 import tablegen.wrapper.recordkeeper as RK
@@ -90,10 +90,10 @@ class TBLParser:
             tdrec = self.getTDRecord(rec)
             yield rec.defname, tdrec
 
-class RecordContext(SimpleNamespace):
+class RecordContext(ModuleType):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name = "RecordContext"):
+        super().__init__(name)
         self.RK = None
         self.lazy = False
         self.__classesMapping = dict()
