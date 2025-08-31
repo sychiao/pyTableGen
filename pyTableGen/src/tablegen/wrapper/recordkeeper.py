@@ -94,11 +94,11 @@ class RecordKeeper(CacheDict, Wrapper):
         elif isinstance(t, binding.StringRecTy):
             return str
         elif isinstance(t, binding.ListRecTy):
-            return list
+            return list[self.getValuefromRecTy(t.getElementType())]
         elif isinstance(t, binding.DagRecTy):
             return DAG
         elif isinstance(t, binding.BitsRecTy):
-            return Bits
+            return Bits[t.getNumBits()]
         elif isinstance(t, binding.RecordRecTy):
             record = t.getClasses()[0]
             return TableGenClassWrapper(record, self)

@@ -15,3 +15,7 @@ riscv_td = os.path.join(TargetDir, 'RISCV.td')
 Recs = RK.RecordKeeper.load(riscv_td, [incDir, TargetDir])
 ctx = RecordContext.load(Recs, lazy=True)
 print(ctx.Instruction)
+
+print('Generating typing stubs...')
+with open('out.pyi', 'w') as f:
+    ctx.gen_typing_stubs(f)
